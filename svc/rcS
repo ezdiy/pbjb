@@ -1,4 +1,10 @@
 #!/bin/sh
+sleep 2
+# safety escape
+kc=$(dmesg | grep gpio_keys_gpio_isr | wc -l)
+if [ $kc -gt 10 ]; then
+	exit
+fi
 export PATH=/mnt/secure/bin:/sbin:/usr/sbin:$PATH
 for n in /mnt/secure/init.d/*.sh; do
         $n
