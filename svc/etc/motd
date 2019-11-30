@@ -1,5 +1,5 @@
-======================================================
-PocketBook services v0.1, http://github.com/ezdiy/pbjb
-======================================================
-Root password can be changed by saving password.txt
-in top folder of storage (/mnt/ext1/password.txt).
+====================================================
+PocketBook services v2, http://github.com/ezdiy/pbjb
+====================================================
+root password can be set by saving password.txt
+in top folder of storage (/mnt/ext1/password.txt)
