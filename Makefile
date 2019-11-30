@@ -123,7 +123,7 @@ svc/bin/proftpd: $(proftpd)
 	$(strip) $(proftpd)/proftpd -o $@
 
 svc/bin/dropbear: dropbear-hacks
-	cp -f options.h dropbear-hacks/src
+	cp -f dropbear-options.h dropbear-hacks/src/options.h
 	(cd dropbear-hacks/src && $(common_configure) --verbose $(SSH_CONFIG_OPTIONS))
 	make -C dropbear-hacks/src PROGRAMS="dropbear dbclient scp" MULTI=1 STATIC=1
 	$(strip) dropbear-hacks/src/dropbearmulti -o $@
