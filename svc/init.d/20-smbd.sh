@@ -1,2 +1,3 @@
 #!/mnt/secure/su /bin/sh
-smbd -s /mnt/secure/etc/samba/smb.conf
+smbd -D -s /mnt/secure/etc/samba/smb.conf
+nmbd -D -s /mnt/secure/etc/samba/smb.conf
