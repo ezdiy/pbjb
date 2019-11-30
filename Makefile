@@ -92,7 +92,7 @@ clean:
 Jailbreak.app: hax.c
 	$(cc) -s -static $< -o $@
 Services.app: FORCE svc
-	(cat svc.sh && tar cvzf - -C svc .) > Services.app
+	(cat services-installer.sh && tar cvzf - -C svc .) > Services.app
 	#tar cvf test.tar -C svc .
 
 svc: $(svcbins)
@@ -113,7 +113,7 @@ $(iptables):
 
 # each of svcbin
 svc/bin/iptables: $(iptables)
-	#(cd $(iptables) && $(common_configure) --disable-devel --disable-nftables --with-xt-lock-name=/var/run/xtables.lock)
+	(cd $(iptables) && $(common_configure) --disable-devel --disable-nftables --with-xt-lock-name=/var/run/xtables.lock)
 	make -C $(iptables)
 	$(strip) $(iptables)/iptables/xtables-legacy-multi -o $@
 
