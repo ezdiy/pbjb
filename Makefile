@@ -3,13 +3,13 @@ cc=$(HOST)-cc
 strip=$(HOST)-strip
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
 samba=samba-3.6.25
 
-common_configure=./configure --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=arm-buildroot-linux-musleabihf-gcc --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
+common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=arm-buildroot-linux-musleabihf-gcc --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
 
 SSH_CONFIG_OPTIONS=--disable-pam --disable-syslog --disable-shadow --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-loginfunc --disable-pututline --disable-pututxline --disable-zlib
 
@@ -82,7 +82,7 @@ all: pbjb.zip
 pbjb.zip: Uninstall.app Jailbreak.app Services.app
 	zip pbjb.zip *.app
 purge: clean
-	rm -rf $(proftpd) $(samba) $(iptables)
+	rm -rf $(proftpd) $(samba) $(iptables) $(proftpd).tar.gz $(samba).tar.gz $(iptables).tar.bz2
 clean:
 	rm -f Jailbreak.app Services.app pbjb.zip $(svcbins)
 	make -C $(proftpd) clean || true
@@ -107,18 +107,18 @@ $(samba):
 	tar -xvzf $(samba).tar.gz
 	cd $(samba) && for p in ../samba-patches/*; do patch -p1 < $$p || exit 1; done
 $(iptables):
-	wget -c https://netfilter.org/projects/iptables/files/$(iptables)tar.bz2
+	wget -c https://netfilter.org/projects/iptables/files/$(iptables).tar.bz2
 	tar -xvjf $(iptables).tar.bz2
 
 
 # each of svcbin
 svc/bin/iptables: $(iptables)
-	(cd $(iptables) && $(common_configure) --disable-devel --disable-nftables --with-xt-lock-name=/var/run/xtables.lock)
+	#(cd $(iptables) && $(common_configure) --disable-devel --disable-nftables --with-xt-lock-name=/var/run/xtables.lock)
 	make -C $(iptables)
-	$(strip) $(iptables)/iptables/iptables/xtables-legacy-multi -o $@
+	$(strip) $(iptables)/iptables/xtables-legacy-multi -o $@
 
 svc/bin/proftpd: $(proftpd)
-	(cd $(proftpd) && $(common_configure) --disable-autoshadow --without-pic --disable-auth-pam  --disable-cap --disable-facl --disable-dso  --disable-trace  --disable-ipv6)
+	(cd $(proftpd) && $(common_configure) --disable-autoshadow --without-pic --disable-auth-pam  --disable-cap --disable-facl --disable-dso  --disable-trace)
 	make -C $(proftpd)
 	$(strip) $(proftpd)/proftpd -o $@
 
