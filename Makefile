@@ -6,7 +6,7 @@ strip=$(HOST)-strip
 svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd
 
 proftpd=proftpd-1.3.5e
-ptables=iptables-1.8.3
+iptables=iptables-1.8.3
 samba=samba-3.6.25
 
 common_configure=./configure --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=arm-buildroot-linux-musleabihf-gcc --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
@@ -81,6 +81,8 @@ SAMBA_CONFIGURE_ARGS=\
 all: pbjb.zip
 pbjb.zip: Uninstall.app Jailbreak.app Services.app
 	zip pbjb.zip *.app
+purge: clean
+	rm -rf $(proftpd) $(samba) $(iptables)
 clean:
 	rm -f Jailbreak.app Services.app pbjb.zip $(svcbins)
 	make -C $(proftpd) clean || true
@@ -116,22 +118,23 @@ svc/bin/iptables: $(iptables)
 	$(strip) $(iptables)/iptables/iptables/xtables-legacy-multi -o $@
 
 svc/bin/proftpd: $(proftpd)
-	(cd $(proftpd) && ($common_configure) --disable-autoshadow --without-pic --disable-auth-pam  --disable-cap --disable-facl --disable-dso  --disable-trace  --disable-ipv6)
+	(cd $(proftpd) && $(common_configure) --disable-autoshadow --without-pic --disable-auth-pam  --disable-cap --disable-facl --disable-dso  --disable-trace  --disable-ipv6)
 	make -C $(proftpd)
 	$(strip) $(proftpd)/proftpd -o $@
 
 svc/bin/dropbear: dropbear-hacks
-	cp options.h dropbear-hacks/src
-	(cd dropbear-hacks/src && $(common_configure) --verbose $(SSH_CONFIG_OPTIONS)
+	cp -f options.h dropbear-hacks/src
+	(cd dropbear-hacks/src && $(common_configure) --verbose $(SSH_CONFIG_OPTIONS))
+	make -C dropbear-hacks/src PROGRAMS="dropbear dbclient scp" MULTI=1 STATIC=1
 	$(strip) dropbear-hacks/src/dropbearmulti -o $@
 
 svc/bin/smbd: $(samba)
-	(cd $(samba)/source3 && $(common_configure) $(SAMBA_CONFIGURE_VARS) $(SAMBA_CONFIGURE_ARGS)
-	make -C $(samba) MODULES= PICFLAG= DYNEXP=
-	$(strip) $(samba)/source3/bin/smbd -o $@
+	(cd $(samba)/source3 && $(common_configure) $(SAMBA_CONFIGURE_VARS) $(SAMBA_CONFIGURE_ARGS) LDFLAGS="-static -Lbin -Wl,--gc-sections")
+	make -C $(samba)/source3 MODULES= PICFLAG= DYNEXP=
+	$(strip) $(samba)/source3/bin/samba_multicall -o $@
 
 svc/bin/ntlmhash: ntlmhash.c
-	$(cc) static -s $< -o $@
+	$(cc) -static -s $< -o $@
 FORCE:
 
 
