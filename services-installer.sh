@@ -36,7 +36,7 @@ if ! grep rootsettings $settings> /dev/null; then
                 "title_id"     : "Rooted device settings",
         },
 _EOF
-        tail -n +2 $settings.old >> $settings
+        tail -n +2 $old >> $settings
 fi
 
 cat <<_EOF > $rootset
