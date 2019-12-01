@@ -18,14 +18,17 @@ base=/mnt/ext1/system/config/settings
 settings=$base/settings.json
 rootset=$base/rootsettings.json
 
-if [ ! -f $settings ]; then
-        cp -f /ebrmain/config/settings/settings.json $settings
-fi
-
 if ! grep rootsettings $settings> /dev/null; then
-        tail -n +2 $settings > /tmp/settings.$$
+	old=/ebrmain/config/settings/settings.json 
+	if [ ! -f $settings ]; then
+        	cp -f $old $settings
+	else
+		old=$settings.old
+		mv -f $settings $old
+	fi
         cat <<_EOF > $settings
 [
+
         {
                 "control_type" : "submenu",
                 "icon_id"      : "ci_system",
@@ -33,8 +36,7 @@ if ! grep rootsettings $settings> /dev/null; then
                 "title_id"     : "Rooted device settings",
         },
 _EOF
-        cat /tmp/settings.$$ >> $settings
-        rm -f /tmp/settings.$$
+        tail -n +2 $settings.old >> $settings
 fi
 
 cat <<_EOF > $rootset
