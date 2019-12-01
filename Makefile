@@ -89,8 +89,11 @@ clean:
 	make -C $(samba) clean || true
 	make -C $(iptables) clean || true
 	make -C dropbear-hacks/src clean || true
-Jailbreak.app: hax.c
+Jailbreak.app: jailbreak.c
 	$(cc) -s -static $< -o $@
+ctest.app: ctest.c
+	$(cc) -s -static $< -o $@
+
 Services.app: FORCE svc
 	(cat services-installer.sh && tar cvzf - -C svc .) > Services.app
 	#tar cvf test.tar -C svc .
