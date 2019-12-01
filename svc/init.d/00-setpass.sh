@@ -1,4 +1,5 @@
 #!/mnt/secure/su /bin/sh
+export TZ=
 nopw="password=(keep unchanged)"
 if [ ! -e /mnt/secure/etc/passwd ] || [ -n "$(find -L /mnt/ext1/rootpassword.txt -prune -newer /mnt/secure/etc/passwd)" ]; then
         if [ ! -e /mnt/ext1/rootpassword.txt ] || [ "$(cat /mnt/ext1/rootpassword.txt)" == "$nopw" ]; then

@@ -12,7 +12,13 @@ iptables=iptables-1.8.3
 samba=samba-3.6.25
 rsync=rsync-3.1.3
 
-common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=arm-buildroot-linux-musleabihf-gcc --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
+# TODO
+lftp=lftp-4.8.4
+powertop=powertop-v2.10
+htop=htop-2.2.0
+
+common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
+common_configure5=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc5) --prefix=/mnt/secure --enable-static --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode
 
 SSH_CONFIG_OPTIONS=--disable-pam --disable-syslog --disable-shadow --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-loginfunc --disable-pututline --disable-pututxline --disable-zlib
 
@@ -108,7 +114,7 @@ Services.app: FORCE svc
 svc: $(svcbins)
 	echo Cross-compiled service binaries
 
-# Retrieve source codes
+# Retrieve source codes for binaries we compile statically with musl (smaller / more portable)
 $(proftpd):
 	wget -c ftp://ftp.proftpd.org/distrib/source/$(proftpd).tar.gz
 	tar -xvzf $(proftpd).tar.gz
@@ -122,6 +128,17 @@ $(iptables):
 $(rsync):
 	wget -c https://download.samba.org/pub/rsync/$(rsync).tar.gz
 	tar -xvzf $(rsync).tar.gz
+
+# These depend on cc5 sdk, as they need ncurses or openssl (static musl would become too big)
+$(htop):
+	wget -c https://hisham.hm/htop/releases/2.2.0/$(htop).tar.gz
+	tar -xvzf $(htop).tar.gz
+$(powertop):
+	wget -c https://01.org/sites/default/files/downloads/$(powertop).tar.gz
+	tar -xvzf $(powrtop).tar.gz
+$(lftp):
+	wget -c http://lftp.yar.ru/ftp/$(lftp).tar.gz
+	tar -xvzf $(lftp).tar.gz
 
 # each of svcbin
 svc/bin/iptables: $(iptables)
@@ -152,6 +169,10 @@ svc/bin/rsync: $(rsync)
 
 svc/bin/ntlmhash: ntlmhash.c
 	$(cc) -static -s $< -o $@
+
+svc/bin/htop: $(htop)
+	(cd $(htop) && $(common_configure5))
+	make -C $(htop)
 FORCE:
 
 
