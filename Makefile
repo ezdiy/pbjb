@@ -2,13 +2,15 @@ HOST=arm-buildroot-linux-musleabihf
 cc=$(HOST)-cc
 cc5=arm-obreey-linux-gnueabi-gcc
 strip=$(HOST)-strip
+ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
 samba=samba-3.6.25
+rsync=rsync-3.1.3
 
 common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=arm-buildroot-linux-musleabihf-gcc --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
 
@@ -79,9 +81,9 @@ SAMBA_CONFIGURE_ARGS=\
 
 
 # When running just "make", package the .app files and .zip release, don't bother to track dependencies for shell sript stuff.
-all: pbjb.zip
-pbjb.zip: Uninstall.app Jailbreak.app Services.app
-	zip pbjb.zip *.app
+all: pbjb-$(ver).zip
+pbjb-$(ver).zip: Uninstall.app Jailbreak.app Services.app
+	zip pbjb-$(ver).zip *.app
 purge: clean
 	rm -rf $(proftpd) $(samba) $(iptables) $(proftpd).tar.gz $(samba).tar.gz $(iptables).tar.bz2
 clean:
@@ -99,7 +101,7 @@ svc/bin/suspendd: suspendd.c
 
 
 Services.app: FORCE svc
-	cat services-installer.sh | sed "s/PKGVER=.\*/PKGVER=`git describe --tags`/"
+	cat services-installer.sh | sed "s/PKGVER=.*/PKGVER=$(ver)/" > Services.app
 	tar cvzf - -C svc . >> Services.app
 	#tar cvf test.tar -C svc .
 
@@ -117,7 +119,9 @@ $(samba):
 $(iptables):
 	wget -c https://netfilter.org/projects/iptables/files/$(iptables).tar.bz2
 	tar -xvjf $(iptables).tar.bz2
-
+$(rsync):
+	wget -c https://download.samba.org/pub/rsync/$(rsync).tar.gz
+	tar -xvzf $(rsync).tar.gz
 
 # each of svcbin
 svc/bin/iptables: $(iptables)
@@ -140,6 +144,11 @@ svc/bin/smbd: $(samba)
 	(cd $(samba)/source3 && $(common_configure) $(SAMBA_CONFIGURE_VARS) $(SAMBA_CONFIGURE_ARGS) LDFLAGS="-static -Lbin -Wl,--gc-sections")
 	make -C $(samba)/source3 MODULES= PICFLAG= DYNEXP=
 	$(strip) $(samba)/source3/bin/samba_multicall -o $@
+
+svc/bin/rsync: $(rsync)
+	(cd $(rsync) && $(common_configure))
+	make -C $(rsync)
+	$(strip) $(rsync)/rsync -o $@
 
 svc/bin/ntlmhash: ntlmhash.c
 	$(cc) -static -s $< -o $@

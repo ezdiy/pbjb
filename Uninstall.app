@@ -1,5 +1,5 @@
 #!/mnt/secure/su /bin/sh
-iv2sh SetActiveTask $$ 0
+iv2sh SetActiveTask `pidof bookshelf.app` 0
 dialog 2 "" "Do you wish to remove root and services (if installed)?" "Yes" "No"
 if [ $? != 1 ]; then
 	exit 0

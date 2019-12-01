@@ -1,6 +1,6 @@
 #!/mnt/secure/su /bin/sh
 PKGVER=v4
-iv2sh SetActiveTask $$ 0
+iv2sh SetActiveTask `pidof bookshelf.app` 0
 dialog 1 "" "Do you wish to (re)install unix services version $PKGVER on this rooted device?" "Yes" "No"
 if [ $? != 1 ]; then
 	exit 0

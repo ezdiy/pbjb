@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 		buf[i+25] = *prog++;
 	if (strcmp(prog - 13, "Jailbreak.app"))
 		return 1;
-	system("iv2sh SetActiveTask $PPID 0");
+	system("iv2sh SetActiveTask `pidof bookshelf.app` 0");
 	if (system("dialog 3 '' '"
 		"Do you wish to jailbreak this device and permit root access?\n"
 		"Device will reboot if the process succeeds.\n\n"
