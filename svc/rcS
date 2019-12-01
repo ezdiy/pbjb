@@ -12,6 +12,6 @@ for f in /mnt/ext1/system/init.d/*.sh /mnt/secure/init.d/*.sh; do
         bn=${n:3}
         id=${bn/.sh/}
 	if [ -f "$f" ] && [ "$(echo $id)" != "0" ]; then
-        	echo $f
+        	$f
 	fi
 done
