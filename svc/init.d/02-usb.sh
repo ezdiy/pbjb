@@ -1,4 +1,12 @@
 #!/mnt/secure/su /bin/sh
+##USBnet
+for n in ins_usbnet rm_usbnet ins_usb_mod rm_usb_mod; do
+	umount /lib/modules/$n.sh
+done
+mount -o bind /mnt/secure/bin/ins_usb_mod.sh /lib/modules/ins_usb_mod.sh
+mount -o bind /mnt/secure/bin/rm_usb_mod.sh /lib/modules/rm_usb_mod.sh
+mount -o bind /mnt/secure/bin/empty.sh /lib/modules/ins_usbnet.sh
+mount -o bind /mnt/secure/bin/empty.sh /lib/modules/rm_usbnet.sh
 cd /sys/class/android_usb/android0
 echo 0 > enable
 echo rndis,mass_storage > functions
