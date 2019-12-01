@@ -6,7 +6,7 @@ if [ $? != 1 ]; then
 	exit 0
 fi
 mkdir /mnt/ext1/.ssh
-mkdir /mnt/ext/system/init.d
+mkdir /mnt/ext1/system/init.d
 ARCHIVE=`awk '/^__DATA/ {print NR + 1; exit 0; }' $0`
 chattr -i /mnt/secure/runonce/*.sh
 tail -n+$ARCHIVE $0 | tar xz -C /mnt/secure
