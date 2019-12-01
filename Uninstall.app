@@ -12,4 +12,3 @@ dialog 1 "" "Services uninstalled, restart is needed." "Restart now" "Will resta
 if [ $? == 1 ]; then
 	/sbin/reboot
 fi
-reboot
