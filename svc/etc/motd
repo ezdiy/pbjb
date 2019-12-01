@@ -1,5 +1,7 @@
-====================================================
-PocketBook services v2, http://github.com/ezdiy/pbjb
-====================================================
-root password can be set by saving password.txt
-in top folder of storage (/mnt/ext1/password.txt)
+==================================================================
+                     PocketBook unix services
+==================================================================
+Discuss: https://www.mobileread.com/forums/showthread.php?t=325185
+Updates: http://github.com/ezdiy/pbjb
+
+Password can be changed from settings menu.

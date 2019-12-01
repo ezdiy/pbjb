@@ -99,7 +99,8 @@ svc/bin/suspendd: suspendd.c
 
 
 Services.app: FORCE svc
-	(cat services-installer.sh && tar cvzf - -C svc .) > Services.app
+	cat services-installer.sh | sed "s/PKGVER=.\*/PKGVER=`git describe --tags`/"
+	tar cvzf - -C svc . >> Services.app
 	#tar cvf test.tar -C svc .
 
 svc: $(svcbins)

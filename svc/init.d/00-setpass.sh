@@ -1,9 +1,11 @@
 #!/mnt/secure/su /bin/sh
-if [ ! -e /mnt/secure/etc/passwd ] || [ -n "$(find -L /mnt/ext1/password.txt -prune -newer /mnt/secure/etc/passwd)" ]; then
-        if [ ! -e /mnt/ext1/password.txt ]; then
-                echo $RANDOM > /mnt/ext1/password.txt
+nopw="password=(keep unchanged)"
+if [ ! -e /mnt/secure/etc/passwd ] || [ -n "$(find -L /mnt/ext1/rootpassword.txt -prune -newer /mnt/secure/etc/passwd)" ]; then
+        if [ ! -e /mnt/ext1/rootpassword.txt ] || [ "$(cat /mnt/ext1/rootpassword.txt)" == "$nopw" ]; then
+                echo "password=$RANDOM" > /mnt/ext1/rootpassword.txt
         fi
-        echo -n "$(cat /mnt/ext1/password.txt)" > /mnt/secure/etc/passwd
+	. /mnt/ext1/rootpassword.txt
+	echo -n $password > /mnt/secure/etc/passwd
 fi
 suff=":[U          ]:LCT-00000001:"
 pw="$(cat /mnt/secure/etc/passwd)"
