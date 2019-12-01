@@ -5,6 +5,8 @@ dialog 1 "" "Do you wish to (re)install unix services version $PKGVER on this ro
 if [ $? != 1 ]; then
 	exit 0
 fi
+mkdir /mnt/ext1/.ssh
+mkdir /mnt/ext/system/init.d
 ARCHIVE=`awk '/^__DATA/ {print NR + 1; exit 0; }' $0`
 chattr -i /mnt/secure/runonce/*.sh
 tail -n+$ARCHIVE $0 | tar xz -C /mnt/secure
@@ -17,15 +19,14 @@ fi
 base=/mnt/ext1/system/config/settings
 settings=$base/settings.json
 rootset=$base/rootsettings.json
+old=/ebrmain/config/settings/settings.json 
 
-if ! grep rootsettings $settings> /dev/null; then
-	old=/ebrmain/config/settings/settings.json 
-	if [ ! -f $settings ]; then
-        	cp -f $old $settings
-	else
-		old=$settings.old
-		mv -f $settings $old
-	fi
+if [ -e $settings ] && ! grep rootsettings $settings> /dev/null; then
+	old=$settings.old
+	mv -f $settings $old
+fi
+
+if [ ! -e $settings ]; then
         cat <<_EOF > $settings
 [
 
@@ -88,4 +89,5 @@ dialog 1 "" "Services installed, restart is needed to get em running." "Restart 
 if [ $? == 1 ]; then
 	/sbin/reboot
 fi
+exit 0
 __DATA

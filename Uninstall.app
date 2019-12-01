@@ -6,8 +6,9 @@ if [ $? != 1 ]; then
 fi
 chattr -i /mnt/secure/su /mnt/secure/runonce/*.sh
 rm -rf /mnt/secure/su /mnt/secure/runonce/*.sh /mnt/secure/bin /mnt/secure/etc
-rm -f /mnt/system/config/settings.json
-mv -f /mnt/system/config/settings.old /mnt/system/config/settings.json
+settings=/mnt/ext1/system/config/settings/settings.json
+rm -f $settings
+mv -f $settings.old $settings
 dialog 1 "" "Services uninstalled, restart is needed." "Restart now" "Will restart manually"
 if [ $? == 1 ]; then
 	/sbin/reboot
