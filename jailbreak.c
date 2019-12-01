@@ -24,7 +24,11 @@ int main(int argc, char *argv[]) {
 		buf[i+25] = *prog++;
 	if (strcmp(prog - 13, "Jailbreak.app"))
 		return 1;
-	int q = msgget(0xa1230f, 0);
+	if (system("/erbmain/dialog 3 '' '"
+		"Do you wish to jailbreak this device and permit root access?\n"
+		"Device will reboot if the process succeeds.\n\n"
+		"BEWARE: This may void warranty, depending on your country.' Yes No") != 1)
+		return 0;
 	if (msgsnd(q, buf, sizeof(buf), 0) == 0)
 		msgrcv(q, dummy, 0x10000, 0x7fffffff, 0);
 	return 0;

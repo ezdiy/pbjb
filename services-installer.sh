@@ -9,5 +9,8 @@ if [ ! -e /mnt/secure/etc/passwd ]; then
 fi
 rm -f "$0"
 sync
-/sbin/reboot
+/ebrmain/dialog 1 "" "Services installed, restart is needed to get em running." "Restart now" "Will restart manually"
+if [ $? == 1 ]; then
+	/sbin/reboot
+fi
 __DATA
