@@ -7,11 +7,11 @@ if [ $kc -gt 10 ]; then
 fi
 export PATH=/mnt/secure/bin:/sbin:/usr/sbin:$PATH
 . /mnt/ext1/system/config/rootsettings.cfg
-for n in /mnt/ext1/system/init.d/*.sh /mnt/secure/init.d/*.sh; do
-        n=${n##*/}
+for f in /mnt/ext1/system/init.d/*.sh /mnt/secure/init.d/*.sh; do
+        n=${f##*/}
         bn=${n:3}
         id=${bn/.sh/}
-	if [ -f "$n" ] && [ "$(echo $id)" != "0" ]; then
-        	$n
+	if [ -f "$f" ] && [ "$(echo $id)" != "0" ]; then
+        	echo $f
 	fi
 done
