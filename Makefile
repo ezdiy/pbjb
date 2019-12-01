@@ -1,5 +1,6 @@
 HOST=arm-buildroot-linux-musleabihf
 cc=$(HOST)-cc
+cc5=arm-obreey-linux-gnueabi-gcc
 strip=$(HOST)-strip
 
 # These are made by the cross compiler
@@ -93,6 +94,9 @@ Jailbreak.app: jailbreak.c
 	$(cc) -s -static $< -o $@
 ctest.app: ctest.c
 	$(cc) -s -static $< -o $@
+svc/bin/suspendd: suspendd.c
+	$(cc5) -s -linkview -Wall $< -o $@
+
 
 Services.app: FORCE svc
 	(cat services-installer.sh && tar cvzf - -C svc .) > Services.app
