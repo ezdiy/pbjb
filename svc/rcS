@@ -11,7 +11,7 @@ for f in /mnt/ext1/system/init.d/*.sh /mnt/secure/init.d/*.sh; do
         n=${f##*/}
         bn=${n:3}
         id=${bn/.sh/}
-	if [ -f "$f" ] && [ "$(echo $id)" != "0" ]; then
+        if [ -f "$f" ] && [ "$(eval echo \${$id})" != "0" ]; then
         	$f
 	fi
 done
