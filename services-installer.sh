@@ -48,7 +48,7 @@ cat <<_EOF > $rootset
                 "control_type" : "executable",
                 "icon_id" : "ci_swupdate",
                 "id" : "rootapply",
-                "storage" : [ "/mnt/secure/bin/applysettings" ],
+                "storage" : [ "/mnt/secure/bin/applysettings.app" ],
                 "title_id" : "Reboot to apply changes"
         },
         {
@@ -85,7 +85,6 @@ echo "]" >> $rootset
 
 
 
-rm -f "$0"
 sync
 dialog 1 "" "Services installed, restart is needed to get em running." "Restart now" "Will restart manually"
 if [ $? == 1 ]; then
