@@ -5,12 +5,13 @@ strip=$(HOST)-strip
 ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/thttpd
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
 samba=samba-3.6.25
 rsync=rsync-3.1.3
+thttpd=thttpd-2.29
 
 # TODO
 lftp=lftp-4.8.4
@@ -115,6 +116,10 @@ svc: $(svcbins)
 	echo Cross-compiled service binaries
 
 # Retrieve source codes for binaries we compile statically with musl (smaller / more portable)
+
+$(thttpd):
+	wget -c https://acme.com/software/thttpd/$(thttpd).tar.gz
+	tar -xvzf $(thttpd).tar.gz
 $(proftpd):
 	wget -c ftp://ftp.proftpd.org/distrib/source/$(proftpd).tar.gz
 	tar -xvzf $(proftpd).tar.gz
@@ -169,6 +174,11 @@ svc/bin/rsync: $(rsync)
 
 svc/bin/ntlmhash: ntlmhash.c
 	$(cc) -static -s $< -o $@
+
+svc/bin/thttpd: $(thttpd)
+	(cd $(thttpd) && CC=$(cc) ./configure --prefix=/ --host=arm-linux-gnueabi)
+	make -C $(thttpd) LDFLAGS="-static"
+	$(strip) $(thttpd)/thttpd -o $@
 
 svc/bin/htop: $(htop)
 	(cd $(htop) && $(common_configure5))
