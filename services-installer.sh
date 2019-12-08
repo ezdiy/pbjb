@@ -50,6 +50,14 @@ cat <<_EOF > $rootset
 [
         {
                 "control_type" : "executable",
+                "icon_id" : "ci_softwareinfo",
+                "id" : "rootapply",
+                "storage" : [ "/mnt/secure/bin/sysstat.app" ],
+                "title_id" : "System status"
+        },
+
+        {
+                "control_type" : "executable",
                 "icon_id" : "ci_swupdate",
                 "id" : "rootapply",
                 "storage" : [ "/mnt/secure/bin/applysettings.app" ],
@@ -58,6 +66,7 @@ cat <<_EOF > $rootset
         {
                 "id"            :   "password_set",
                 "title_id"      :   "Root password",
+		"icon_id"       :   "ci_set_password",
                 "control_type"  :   "edit",
                 "kind"          :   "text",
                 "default"       :   "(keep unchanged)",

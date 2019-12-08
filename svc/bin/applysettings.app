@@ -1,6 +1,9 @@
 #!/mnt/secure/su /bin/sh
 export PATH=/mnt/secure/bin:$PATH
+dialog 1 "" "Do you really want restart the device?" "Yes" "No"
+if [ $? != 1 ]; then
+	exit 0
+fi
 iptables-save > /mnt/secure/etc/firewall
-sleep 1
 sync
 /sbin/reboot
