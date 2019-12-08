@@ -5,6 +5,7 @@ dialog 1 "" "Do you wish to (re)install unix services version $PKGVER on this ro
 if [ $? != 1 ]; then
 	exit 0
 fi
+echo $PKGVER > /mnt/secure/.pkgver
 mkdir -p /mnt/ext1/public_html
 echo "*.html files are served from here if 'HTTP server' option is enabled. dynamic pages can be served by *.cgi scripts." > /mnt/ext1/public_html/index.html
 mkdir /mnt/ext1/public
@@ -55,7 +56,6 @@ cat <<_EOF > $rootset
                 "storage" : [ "/mnt/secure/bin/sysstat.app" ],
                 "title_id" : "System status"
         },
-
         {
                 "control_type" : "executable",
                 "icon_id" : "ci_swupdate",

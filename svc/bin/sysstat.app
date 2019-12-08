@@ -13,7 +13,8 @@ check dropbear SSHD
 check lighttpd HTTPD
 check smbd SMBD
 check proftpd FTPD
-dialog 1 "" "IP: $ip
+dialog 1 "" "Version: $(cat /mnt/secure/.pkgver)"
+IP: $ip
 UP: $svcs
 Load:  $(cut -d ' ' -f 1-3 < /proc/loadavg)
 $(cat /proc/meminfo  |egrep "^Mem|^Cached" | sed -e 's/: */: /g')" "OK"
