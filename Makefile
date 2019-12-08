@@ -6,7 +6,7 @@ strip=$(HOST)-strip
 ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp-server svc/bin/htop svc/bin/powertop svc/bin/nnn
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp-server svc/bin/htop svc/bin/powertop svc/bin/nano
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
@@ -16,6 +16,7 @@ lighttpd=lighttpd-1.4.54
 openssh=openssh-8.1p1
 powertop=powertop-v2.10
 htop=htop-2.2.0
+nano=nano-4.6
 
 # TODO
 lftp=lftp-4.8.4
@@ -149,6 +150,10 @@ $(rsync):
 $(htop):
 	wget -c https://hisham.hm/htop/releases/2.2.0/$(htop).tar.gz
 	tar -xvzf $(htop).tar.gz
+$(nano):
+	wget -c https://www.nano-editor.org/dist/v4/$(nano).tar.gz
+	tar -xvzf $(nano).tar.gz
+
 $(powertop):
 	wget -c https://01.org/sites/default/files/downloads/$(powertop).tar.gz
 	tar -xvzf $(powertop).tar.gz
@@ -172,9 +177,6 @@ svc/bin/ntlmhash: ntlmhash.c
 
 
 # The following are linked with sdk (may not work on slightly older firmware)
-svc/bin/nnn:
-	make -C nnn CC=$(cc5)
-
 svc/bin/iptables: $(iptables)
 	(cd $(iptables) && $(common_configure5) --disable-devel --disable-nftables --with-xt-lock-name=/var/run/xtables.lock)
 	make -C $(iptables)
@@ -205,6 +207,12 @@ svc/bin/htop: $(htop)
 	(cd $(htop) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
 	make -C $(htop)
 	$(strip) $(htop)/htop -o $@
+
+svc/bin/nano: $(nano)
+	#(cd $(nano) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
+	make -C $(nano)
+	$(strip) $(nano)/src/nano -o $@
+
 
 svc/bin/powertop: $(powertop)
 	(cd $(powertop) && $(common_configure5) NCURSES_CFLAGS=" " LIBNL_CFLAGS=" " LIBNL_LIBS="-lnl -lnl-genl" ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes)
