@@ -7,5 +7,7 @@ echo > ${DIR}/f_mass_storage/lun2/file
 # Resume services that request it
 export PATH=/mnt/secure/bin:/sbin:/usr/sbin:$PATH
 for f in /tmp/resume.*; do
-	"$f"
+	if [ -O "$f" ]; then
+		"$f"
+	fi
 done
