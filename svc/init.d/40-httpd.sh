@@ -1,5 +1,7 @@
 #!/mnt/secure/su /bin/sh
 ##HTTP & WebDAV server
 mkdir /mnt/ext1/public_html
-ln -s $0 /tmp/service.$1
+if [ "$1" != "" ]; then
+        ln -s $0 /tmp/service.$1
+fi
 lighttpd -f /mnt/secure/etc/lighttpd.conf
