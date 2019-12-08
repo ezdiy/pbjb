@@ -1,5 +1,6 @@
 // Put lighttpd modules you want enabled in here
 
+PLUGIN_INIT(mod_openssl)
 PLUGIN_INIT(mod_setenv)
 PLUGIN_INIT(mod_access)
 PLUGIN_INIT(mod_alias)

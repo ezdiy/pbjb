@@ -19,7 +19,7 @@ powertop=powertop-v2.10
 htop=htop-2.2.0
 
 common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --without-pcre --without-pic --without-geoip --without-maxminddb --without-webdav
-common_configure5=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc5) --prefix=/mnt/secure --enable-static --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode
+common_configure5=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc5) --prefix=/mnt/secure --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode
 
 SSH_CONFIG_OPTIONS=--disable-pam --disable-syslog --disable-shadow --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-loginfunc --disable-pututline --disable-pututxline --disable-zlib
 
@@ -174,13 +174,15 @@ svc/bin/rsync: $(rsync)
 svc/bin/ntlmhash: ntlmhash.c
 	$(cc) -static -s $< -o $@
 
-lighty_flags=--with-pic= --without-zlib --without-bzip2
+lighty_flags=--with-pic= --without-pic --with-pcre=yes --with-openssl=yes PCRE_LIB=-lpcre SSL_LIB="-lssl -lcrypto"
+# --without-zlib --without-bzip2
 # no_build="mod_accesslog mod_compress mod_deflate mod_evhost mod_extforward mod_fastcgi mod_flv_streaming mod_proxy mod_rrdtool mod_secdownload mod_scgi mod_sockproxy mod_userdir mod_usertrack mod_vhostddb mod_wstunnel"
 
 svc/bin/lighttpd: $(lighttpd)
 	cp -f plugin-static.h $(lighttpd)/src
-	(cd $(lighttpd) && LIGHTTPD_STATIC=yes CPPFLAGS=-DLIGHTTPD_STATIC $(common_configure) $(lighty_flags))
-	make -C $(lighttpd) LDFLAGS="-static" lighttpd_LDFLAGS="--static -Wl,-gc-sections"
+	(cd $(lighttpd) && LIGHTTPD_STATIC=yes CPPFLAGS=-DLIGHTTPD_STATIC $(common_configure5) $(lighty_flags))
+	make -C $(lighttpd) lighttpd_LDFLAGS="-Wl,-gc-sections"
+#LDFLAGS="-static" lighttpd_LDFLAGS="--static -Wl,-gc-sections"
 	$(strip) $(lighttpd)/src/lighttpd -o $@
 
 svc/bin/htop: $(htop)
