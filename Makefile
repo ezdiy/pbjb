@@ -218,7 +218,7 @@ svc/bin/nano: $(nano)
 	$(strip) $(nano)/src/nano -o $@
 
 svc/bin/openvpn: $(openvpn)
-	#(cd $(openvpn) && $(common_configure5) --disable-plugin-auth-pam --disable-plugin-down-root --enable-small)
+	(cd $(openvpn) && $(common_configure5) --disable-plugin-auth-pam --disable-plugin-down-root)
 	make -C $(openvpn)
 	$(strip) $(openvpn)/src/openvpn/openvpn -o $@
 
