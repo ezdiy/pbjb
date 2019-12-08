@@ -5,7 +5,7 @@ strip=$(HOST)-strip
 ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp svc/bin/sftp-server svc/bin/htop
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
@@ -19,8 +19,9 @@ lftp=lftp-4.8.4
 powertop=powertop-v2.10
 htop=htop-2.2.0
 
-common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --without-pcre --without-pic --without-geoip --without-maxminddb --without-webdav
-common_configure5=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc5) --prefix=/mnt/secure --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode
+common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DSFTPSERVER_PATH=\\\"/mnt/secure/bin/sftp-server\\\" -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
+
+common_configure5=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc5) --prefix=/mnt/secure --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode --without-included-zlib --without-included-popt
 
 SSH_CONFIG_OPTIONS=--disable-pam --disable-syslog --disable-shadow --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-loginfunc --disable-pututline --disable-pututxline --disable-zlib
 
@@ -98,8 +99,12 @@ clean:
 	rm -f Jailbreak.app Services.app pbjb.zip $(svcbins)
 	make -C $(proftpd) clean || true
 	make -C $(samba) clean || true
+	make -C $(samba)/source3 clean || true
+	rm -f $(samba)/auth/*.o $(samba)/source3/multi.o || true
 	make -C $(iptables) clean || true
 	make -C dropbear-hacks/src clean || true
+	make -C $(htop) clean
+	make -C $(openssh) clean
 Jailbreak.app: jailbreak.c
 	$(cc) -s -static $< -o $@
 ctest.app: ctest.c
@@ -150,16 +155,6 @@ $(lftp):
 	tar -xvzf $(lftp).tar.gz
 
 # each of svcbin
-svc/bin/iptables: $(iptables)
-	(cd $(iptables) && $(common_configure) --disable-devel --disable-nftables --with-xt-lock-name=/var/run/xtables.lock)
-	make -C $(iptables)
-	$(strip) $(iptables)/iptables/xtables-legacy-multi -o $@
-
-svc/bin/proftpd: $(proftpd)
-	(cd $(proftpd) && $(common_configure) --disable-autoshadow --without-pic --disable-auth-pam  --disable-cap --disable-facl --disable-dso  --disable-trace)
-	make -C $(proftpd)
-	$(strip) $(proftpd)/proftpd -o $@
-
 svc/bin/dropbear: dropbear-hacks
 	(cd dropbear-hacks/src && $(common_configure) --verbose $(SSH_CONFIG_OPTIONS))
 	make -C dropbear-hacks/src PROGRAMS="dropbear dbclient scp" MULTI=1 STATIC=1
@@ -170,13 +165,26 @@ svc/bin/smbd: $(samba)
 	make -C $(samba)/source3 MODULES= PICFLAG= DYNEXP=
 	$(strip) $(samba)/source3/bin/samba_multicall -o $@
 
-svc/bin/rsync: $(rsync)
-	(cd $(rsync) && $(common_configure))
-	make -C $(rsync)
-	$(strip) $(rsync)/rsync -o $@
-
 svc/bin/ntlmhash: ntlmhash.c
 	$(cc) -static -s $< -o $@
+
+
+# The following are linked with sdk (may not work on slightly older firmware)
+
+svc/bin/iptables: $(iptables)
+	(cd $(iptables) && $(common_configure5) --disable-devel --disable-nftables --with-xt-lock-name=/var/run/xtables.lock)
+	make -C $(iptables)
+	$(strip) $(iptables)/iptables/xtables-legacy-multi -o $@
+
+svc/bin/proftpd: $(proftpd)
+	(cd $(proftpd) && $(common_configure5) --disable-autoshadow --without-pic --disable-auth-pam  --disable-cap --disable-facl --disable-dso  --disable-trace)
+	make -C $(proftpd)
+	$(strip) $(proftpd)/proftpd -o $@
+
+svc/bin/rsync: $(rsync)
+	(cd $(rsync) && $(common_configure5))
+	make -C $(rsync)
+	$(strip) $(rsync)/rsync -o $@
 
 lighty_flags=--with-pic= --without-pic --with-pcre=yes --with-openssl=yes PCRE_LIB=-lpcre SSL_LIB="-lssl -lcrypto"
 # --without-zlib --without-bzip2
@@ -194,8 +202,13 @@ svc/bin/htop: $(htop)
 	make -C $(htop)
 	$(strip) $(htop)/htop -o $@
 
+svc/bin/sftp-server: svc/bin/sftp
 svc/bin/sftp: $(openssh)
-	(cd $(openssh) && $(common_configure5))
+	#(cd $(openssh) && $(common_configure5))
+	make -C $(openssh)
+	$(strip) $(openssh)/sftp-server -o svc/bin/sftp-server
+	$(strip) $(openssh)/sftp -o svc/bin/sftp
+	#$(strip) $(openssh)/ssh-keygen -o svc/bin/ssh-keygen
 
 FORCE:
 
