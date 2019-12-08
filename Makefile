@@ -181,8 +181,9 @@ svc/bin/thttpd: $(thttpd)
 	$(strip) $(thttpd)/thttpd -o $@
 
 svc/bin/htop: $(htop)
-	(cd $(htop) && $(common_configure5))
+	(cd $(htop) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
 	make -C $(htop)
+	$(strip) $(htop)/htop -o $@
 FORCE:
 
 

@@ -5,6 +5,7 @@ dialog 1 "" "Do you wish to (re)install unix services version $PKGVER on this ro
 if [ $? != 1 ]; then
 	exit 0
 fi
+mkdir -p /mnt/ext1/public_html
 mkdir /mnt/ext1/.ssh
 mkdir /mnt/ext1/system/init.d
 mkdir -p /mnt/ext1/system/config/settings
