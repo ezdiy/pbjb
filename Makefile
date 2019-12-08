@@ -5,20 +5,20 @@ strip=$(HOST)-strip
 ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/thttpd
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
 samba=samba-3.6.25
 rsync=rsync-3.1.3
-thttpd=thttpd-2.29
+lighttpd=lighttpd-1.4.54
 
 # TODO
 lftp=lftp-4.8.4
 powertop=powertop-v2.10
 htop=htop-2.2.0
 
-common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
+common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --without-pcre --without-pic --without-geoip --without-maxminddb --without-webdav
 common_configure5=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc5) --prefix=/mnt/secure --enable-static --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode
 
 SSH_CONFIG_OPTIONS=--disable-pam --disable-syslog --disable-shadow --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-loginfunc --disable-pututline --disable-pututxline --disable-zlib
@@ -117,9 +117,9 @@ svc: $(svcbins)
 
 # Retrieve source codes for binaries we compile statically with musl (smaller / more portable)
 
-$(thttpd):
-	wget -c https://acme.com/software/thttpd/$(thttpd).tar.gz
-	tar -xvzf $(thttpd).tar.gz
+$(lighttpd):
+	wget -c https://download.lighttpd.net/lighttpd/releases-1.4.x/$(lighttpd).tar.gz
+	tar -xvzf $(lighttpd).tar.gz
 $(proftpd):
 	wget -c ftp://ftp.proftpd.org/distrib/source/$(proftpd).tar.gz
 	tar -xvzf $(proftpd).tar.gz
@@ -174,10 +174,14 @@ svc/bin/rsync: $(rsync)
 svc/bin/ntlmhash: ntlmhash.c
 	$(cc) -static -s $< -o $@
 
-svc/bin/thttpd: $(thttpd)
-	(cd $(thttpd) && CC=$(cc) ./configure --prefix=/ --host=arm-linux-gnueabi)
-	make -C $(thttpd) LDFLAGS="-static"
-	$(strip) $(thttpd)/thttpd -o $@
+lighty_flags=--with-pic= --without-zlib --without-bzip2
+# no_build="mod_accesslog mod_compress mod_deflate mod_evhost mod_extforward mod_fastcgi mod_flv_streaming mod_proxy mod_rrdtool mod_secdownload mod_scgi mod_sockproxy mod_userdir mod_usertrack mod_vhostddb mod_wstunnel"
+
+svc/bin/lighttpd: $(lighttpd)
+	cp -f plugin-static.h $(lighttpd)/src
+	(cd $(lighttpd) && LIGHTTPD_STATIC=yes CPPFLAGS=-DLIGHTTPD_STATIC $(common_configure) $(lighty_flags))
+	make -C $(lighttpd) LDFLAGS="-static" lighttpd_LDFLAGS="--static -Wl,-gc-sections"
+	$(strip) $(lighttpd)/src/lighttpd -o $@
 
 svc/bin/htop: $(htop)
 	(cd $(htop) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
