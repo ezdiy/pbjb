@@ -1,11 +1,12 @@
 HOST=arm-buildroot-linux-musleabihf
 cc=$(HOST)-cc
 cc5=arm-obreey-linux-gnueabi-gcc
+cxx5=arm-obreey-linux-gnueabi-g++
 strip=$(HOST)-strip
 ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp svc/bin/sftp-server svc/bin/htop
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp svc/bin/sftp-server svc/bin/htop svc/bin/powertop
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
@@ -21,7 +22,7 @@ htop=htop-2.2.0
 
 common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DSFTPSERVER_PATH=\\\"/mnt/secure/bin/sftp-server\\\" -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
 
-common_configure5=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc5) --prefix=/mnt/secure --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode --without-included-zlib --without-included-popt
+common_configure5=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc5) CXX=$(cxx5) --prefix=/mnt/secure --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode --without-included-zlib --without-included-popt
 
 SSH_CONFIG_OPTIONS=--disable-pam --disable-syslog --disable-shadow --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-loginfunc --disable-pututline --disable-pututxline --disable-zlib
 
@@ -105,6 +106,7 @@ clean:
 	make -C dropbear-hacks/src clean || true
 	make -C $(htop) clean
 	make -C $(openssh) clean
+	make -C $(powertop) clean
 Jailbreak.app: jailbreak.c
 	$(cc) -s -static $< -o $@
 ctest.app: ctest.c
@@ -149,7 +151,7 @@ $(htop):
 	tar -xvzf $(htop).tar.gz
 $(powertop):
 	wget -c https://01.org/sites/default/files/downloads/$(powertop).tar.gz
-	tar -xvzf $(powrtop).tar.gz
+	tar -xvzf $(powertop).tar.gz
 $(lftp):
 	wget -c http://lftp.yar.ru/ftp/$(lftp).tar.gz
 	tar -xvzf $(lftp).tar.gz
@@ -201,6 +203,12 @@ svc/bin/htop: $(htop)
 	(cd $(htop) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
 	make -C $(htop)
 	$(strip) $(htop)/htop -o $@
+
+svc/bin/powertop: $(powertop)
+	(cd $(powertop) && $(common_configure5) NCURSES_CFLAGS=" " LIBNL_CFLAGS=" " LIBNL_LIBS="-lnl -lnl-genl" ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes)
+	make -C $(powertop)
+	$(strip) $(powertop)/src/powertop -o $@
+
 
 svc/bin/sftp-server: svc/bin/sftp
 svc/bin/sftp: $(openssh)
