@@ -6,7 +6,7 @@ strip=$(HOST)-strip
 ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp-server svc/bin/htop svc/bin/powertop svc/bin/nano
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp-server svc/bin/htop svc/bin/powertop svc/bin/nano svc/bin/openvpn svc/bin/lftp
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
@@ -17,13 +17,14 @@ openssh=openssh-8.1p1
 powertop=powertop-v2.10
 htop=htop-2.2.0
 nano=nano-4.6
+openvpn=openvpn-2.4.8
 
 # TODO
 lftp=lftp-4.8.4
 
 common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DSFTPSERVER_PATH=\\\"/mnt/secure/bin/sftp-server\\\" -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
 
-common_configure5=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc5) CXX=$(cxx5) --prefix=/mnt/secure --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode --without-included-zlib --without-included-popt
+common_configure5=./configure --without-gnutls --with-openssl --disable-lz4 --disable-lzo --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-obreey-linux-gnueabi CC=$(cc5) CXX=$(cxx5) --prefix=/mnt/secure --disable-shared --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure --disable-unicode --without-included-zlib --without-included-popt
 
 SSH_CONFIG_OPTIONS=--disable-pam --disable-syslog --disable-shadow --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx --disable-loginfunc --disable-pututline --disable-pututxline --disable-zlib
 
@@ -153,6 +154,9 @@ $(htop):
 $(nano):
 	wget -c https://www.nano-editor.org/dist/v4/$(nano).tar.gz
 	tar -xvzf $(nano).tar.gz
+$(openvpn):
+	wget -c https://swupdate.openvpn.org/community/releases/$(openvpn).tar.gz
+	tar -xvzf $(openvpn).tar.gz
 
 $(powertop):
 	wget -c https://01.org/sites/default/files/downloads/$(powertop).tar.gz
@@ -209,9 +213,14 @@ svc/bin/htop: $(htop)
 	$(strip) $(htop)/htop -o $@
 
 svc/bin/nano: $(nano)
-	#(cd $(nano) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
+	(cd $(nano) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
 	make -C $(nano)
 	$(strip) $(nano)/src/nano -o $@
+
+svc/bin/openvpn: $(openvpn)
+	#(cd $(openvpn) && $(common_configure5) --disable-plugin-auth-pam --disable-plugin-down-root --enable-small)
+	make -C $(openvpn)
+	$(strip) $(openvpn)/src/openvpn/openvpn -o $@
 
 
 svc/bin/powertop: $(powertop)
@@ -219,6 +228,10 @@ svc/bin/powertop: $(powertop)
 	make -C $(powertop)
 	$(strip) $(powertop)/src/powertop -o $@
 
+svc/bin/lftp: $(lftp)
+	(cd $(lftp) && LIBS=-lz $(common_configure5) ac_cv_func_fallocate=no --without-zlib zlib_cv_libz=yes zlib_cv_zlib_h=yes ac_cv_header_zlib_h=yes ac_cv_lib_z_inflateEnd=yes)
+	make -C $(lftp)
+	$(strip) $(lftp)/src/lftp -o $@
 
 svc/bin/sftp-server: $(openssh)
 	(cd $(openssh) && $(common_configure5))
