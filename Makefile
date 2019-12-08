@@ -5,13 +5,14 @@ strip=$(HOST)-strip
 ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
 samba=samba-3.6.25
 rsync=rsync-3.1.3
 lighttpd=lighttpd-1.4.54
+openssh=openssh-8.1p1
 
 # TODO
 lftp=lftp-4.8.4
@@ -116,6 +117,9 @@ svc: $(svcbins)
 	echo Cross-compiled service binaries
 
 # Retrieve source codes for binaries we compile statically with musl (smaller / more portable)
+$(openssh):
+	wget -c https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/$(openssh).tar.gz
+	tar -xvzf $(openssh).tar.gz
 
 $(lighttpd):
 	wget -c https://download.lighttpd.net/lighttpd/releases-1.4.x/$(lighttpd).tar.gz
@@ -189,6 +193,10 @@ svc/bin/htop: $(htop)
 	(cd $(htop) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
 	make -C $(htop)
 	$(strip) $(htop)/htop -o $@
+
+svc/bin/sftp: $(openssh)
+	(cd $(openssh) && $(common_configure5))
+
 FORCE:
 
 
