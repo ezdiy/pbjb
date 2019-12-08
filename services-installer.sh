@@ -6,6 +6,10 @@ if [ $? != 1 ]; then
 	exit 0
 fi
 mkdir -p /mnt/ext1/public_html
+echo "*.html files are served from here if 'HTTP server' option is enabled. dynamic pages can be served by *.cgi scripts." > /mnt/ext1/public_html/index.html
+mkdir /mnt/ext1/public
+echo 'Files in here are served to public via smb:\\pocketbook\public, ftp://anonymous@pocketbook and http://pocketbook/public/'
+ln -s /mnt/ext1/public_html/public /mnt/ext1/public
 mkdir /mnt/ext1/.ssh
 mkdir /mnt/ext1/system/init.d
 mkdir -p /mnt/ext1/system/config/settings

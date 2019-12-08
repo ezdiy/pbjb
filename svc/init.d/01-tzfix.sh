@@ -9,3 +9,5 @@ if [ "$f" != "" ]; then
         chmod 644 /etc/localtime
         mount -o remount,ro /
 fi
+mount -o bind /mnt/secure/etc/terminfo /usr/share/terminfo
+
