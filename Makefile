@@ -6,7 +6,7 @@ strip=$(HOST)-strip
 ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp svc/bin/sftp-server svc/bin/htop svc/bin/powertop
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp-server svc/bin/htop svc/bin/powertop svc/bin/nnn
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
@@ -14,11 +14,11 @@ samba=samba-3.6.25
 rsync=rsync-3.1.3
 lighttpd=lighttpd-1.4.54
 openssh=openssh-8.1p1
+powertop=powertop-v2.10
+htop=htop-2.2.0
 
 # TODO
 lftp=lftp-4.8.4
-powertop=powertop-v2.10
-htop=htop-2.2.0
 
 common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DSFTPSERVER_PATH=\\\"/mnt/secure/bin/sftp-server\\\" -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
 
@@ -172,6 +172,8 @@ svc/bin/ntlmhash: ntlmhash.c
 
 
 # The following are linked with sdk (may not work on slightly older firmware)
+svc/bin/nnn:
+	make -C nnn CC=$(cc5)
 
 svc/bin/iptables: $(iptables)
 	(cd $(iptables) && $(common_configure5) --disable-devel --disable-nftables --with-xt-lock-name=/var/run/xtables.lock)
@@ -210,13 +212,10 @@ svc/bin/powertop: $(powertop)
 	$(strip) $(powertop)/src/powertop -o $@
 
 
-svc/bin/sftp-server: svc/bin/sftp
-svc/bin/sftp: $(openssh)
-	#(cd $(openssh) && $(common_configure5))
-	make -C $(openssh)
+svc/bin/sftp-server: $(openssh)
+	(cd $(openssh) && $(common_configure5))
+	make -C $(openssh) sftp-server
 	$(strip) $(openssh)/sftp-server -o svc/bin/sftp-server
-	$(strip) $(openssh)/sftp -o svc/bin/sftp
-	#$(strip) $(openssh)/ssh-keygen -o svc/bin/ssh-keygen
 
 FORCE:
 
