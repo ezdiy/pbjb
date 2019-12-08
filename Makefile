@@ -6,7 +6,7 @@ strip=$(HOST)-strip
 ver=$(shell git describe --tags)
 
 # These are made by the cross compiler
-svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp-server svc/bin/htop svc/bin/powertop svc/bin/nano svc/bin/openvpn svc/bin/lftp
+svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp-server svc/bin/htop svc/bin/powertop svc/bin/nano svc/bin/lftp
 
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
@@ -17,7 +17,7 @@ openssh=openssh-8.1p1
 powertop=powertop-v2.10
 htop=htop-2.2.0
 nano=nano-4.6
-openvpn=openvpn-2.4.8
+#openvpn=openvpn-2.4.8
 
 # TODO
 lftp=lftp-4.8.4
@@ -154,9 +154,9 @@ $(htop):
 $(nano):
 	wget -c https://www.nano-editor.org/dist/v4/$(nano).tar.gz
 	tar -xvzf $(nano).tar.gz
-$(openvpn):
-	wget -c https://swupdate.openvpn.org/community/releases/$(openvpn).tar.gz
-	tar -xvzf $(openvpn).tar.gz
+#$(openvpn):
+#	wget -c https://swupdate.openvpn.org/community/releases/$(openvpn).tar.gz
+#	tar -xvzf $(openvpn).tar.gz
 
 $(powertop):
 	wget -c https://01.org/sites/default/files/downloads/$(powertop).tar.gz
@@ -217,10 +217,10 @@ svc/bin/nano: $(nano)
 	make -C $(nano)
 	$(strip) $(nano)/src/nano -o $@
 
-svc/bin/openvpn: $(openvpn)
-	(cd $(openvpn) && $(common_configure5) --disable-plugin-auth-pam --disable-plugin-down-root)
-	make -C $(openvpn)
-	$(strip) $(openvpn)/src/openvpn/openvpn -o $@
+#svc/bin/openvpn: $(openvpn)
+#	(cd $(openvpn) && $(common_configure5) --disable-plugin-auth-pam --disable-plugin-down-root)
+#	make -C $(openvpn)
+#	$(strip) $(openvpn)/src/openvpn/openvpn -o $@
 
 
 svc/bin/powertop: $(powertop)
