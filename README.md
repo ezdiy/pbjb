@@ -1,4 +1,4 @@
-https://www.mobileread.com/forums/showthread.php?p=3921722
+Use https://www.mobileread.com/forums/showthread.php?p=3921722 if you have an issue and can't narrow down proper cause/repro as other users on there may help you. Github is strictly for the technical side, not support.
 
 This tree uses both Pocketbook SDK for dynamic linking, as well as static musl libc cross comppiler
 for critical services (ssh and smb). The SDK has poor portability between firmware versions, but allows
