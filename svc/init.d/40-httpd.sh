@@ -1,4 +1,4 @@
-#!/mnt/secure/su /bin/sh
+#!/bin/sh
 ##HTTP & WebDAV server
 mkdir /mnt/ext1/public_html
 if [ "$1" != "" ]; then

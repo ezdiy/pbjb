@@ -1,4 +1,4 @@
-#!/mnt/secure/su /bin/sh
+#!/bin/sh
 ##USBnet
 for n in ins_usbnet rm_usbnet ins_usb_mod rm_usb_mod; do
 	umount /lib/modules/$n.sh

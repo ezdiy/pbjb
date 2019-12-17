@@ -1,4 +1,4 @@
-#!/mnt/secure/su /bin/sh
+#!/bin/sh
 #rapidly nuke dead tcp sessions
 cd /proc/sys/net/ipv4
 echo 60 > tcp_keepalive_time

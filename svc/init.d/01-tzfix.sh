@@ -1,4 +1,4 @@
-#!/mnt/secure/su /bin/sh
+#!/bin/sh
 # This is necessary, otherwise processes with /etc/localtime open will get killed on USB storage.
 # Don't bother with write-free shadowing, localtime is too trivial for that.
 f=`readlink /etc/localtime`

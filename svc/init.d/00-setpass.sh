@@ -1,4 +1,4 @@
-#!/mnt/secure/su /bin/sh
+#!/bin/sh
 if [ -e /mnt/ext1/rootpassword.txt ]; then
 	password="$(cut -c 10- < /mnt/ext1/rootpassword.txt)"
 	if [ "$password" == "(keep unchanged)" ]; then

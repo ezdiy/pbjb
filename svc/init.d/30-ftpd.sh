@@ -1,3 +1,3 @@
-#!/mnt/secure/su /bin/sh
+#!/bin/sh
 ##FTP server
 proftpd
