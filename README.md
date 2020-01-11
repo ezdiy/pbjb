@@ -1,6 +1,6 @@
 Use https://www.mobileread.com/forums/showthread.php?p=3921722 if you have an issue and can't narrow down proper cause/repro as other users on there may help you. Github is strictly for the technical side, not support.
 
-по русски: https://4pda.ru/forum/index.php?showtopic=886480
+по русски: http://4pda.ru/forum/index.php?s=&showtopic=886480&view=findpost&p=92768601
 
 This tree uses both Pocketbook SDK for dynamic linking, as well as static musl libc cross comppiler
 for critical services (ssh and smb). The SDK has poor portability between firmware versions, but allows
