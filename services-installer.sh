@@ -4,23 +4,34 @@ PKGVER=v4
 iv2sh SetActiveTask `pidof bookshelf.app` 0
 PVER=`cat /mnt/secure/.pkgver`
 
-if [ "$PVER" != "" ] && [ "$PVER" != "$PKGVER" ]; then
-	dialog 1 "" "Version $PVER already installed" "Update to $PKGVER" "Cancel" "Uninstall"
-	st=$?
-	if [ $st == 3 ]; then
-		chattr -i /mnt/secure/runonce/*.sh
-		rm -rf /mnt/secure/runonce/*.sh /mnt/secure/bin /mnt/secure/etc /mnt/secure/.pkgver
-		settings=/mnt/ext1/system/config/settings/settings.json
-		rm -f $settings
-		mv -f $settings.old $settings
-		dialog 2 "" "Services uninstalled, restart is needed." "Restart now" "Restart later"
-		if [ $? == 1 ]; then
-			sync
-		        reboot
+function uninstall() {
+	chattr -i /mnt/secure/runonce/*.sh
+	rm -rf /mnt/secure/runonce/*.sh /mnt/secure/bin /mnt/secure/etc /mnt/secure/.pkgver
+	settings=/mnt/ext1/system/config/settings/settings.json
+	rm -f $settings
+	mv -f $settings.old $settings
+	dialog 2 "" "Services uninstalled, restart is needed." "Restart now" "Restart later"
+	if [ $? == 1 ]; then
+		sync
+		reboot
+	fi
+	exit 0
+}
+
+if [ "$PVER" != "" ]; then
+	if [ "$PVER" != "$PKGVER" ]; then
+		dialog 1 "" "Version $PVER already installed" "Update to $PKGVER" "Cancel" "Uninstall"
+		st=$?
+		if [ $st == 3 ]; then
+			uninstall
+		elif [ $st == 2 ]; then
+			exit 0
 		fi
-		exit 0
-	elif [ $st == 2 ]; then
-		exit 0
+	else
+		dialog 1 "" "Version $PVER already installed." "Cancel" "Uninstall"
+		if [ $? == 2 ]; then
+			uninstall
+		fi
 	fi
 else
 	dialog 1 "" "Do you wish to install $PKGVER?" "Yes" "No"
