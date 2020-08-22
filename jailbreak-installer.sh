@@ -1,5 +1,6 @@
 #!/bin/sh
 PKGVER=v4
+iv2sh SetActiveTask `pidof bookshelf.app` 0
 if [ -e /mnt/secure/su ]; then
 	dialog 2 "" "Do you wish to remove root?" "Yes" "No"
 	if [ $? != 1 ]; then

