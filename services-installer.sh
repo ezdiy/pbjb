@@ -1,7 +1,27 @@
 #!/mnt/secure/su /bin/sh
+export PATH=/sbin:/usr/sbin:$PATH
 PKGVER=v4
 iv2sh SetActiveTask `pidof bookshelf.app` 0
-dialog 1 "" "Do you wish to (re)install unix services version $PKGVER on this rooted device?" "Yes" "No"
+PVER=`cat /mnt/secure/.pkgver`
+
+if [ "$PVER" != "" ] && [ "$PVER" != "$PKGVER" ]; then
+	dialog 1 "" "Version $PVER already installed" "Update to $PKGVER" "Cancel" "Uninstall"
+	if [ $? == 3 ]; then
+		chattr -i /mnt/secure/runonce/*.sh
+		rm -rf /mnt/secure/runonce/*.sh /mnt/secure/bin /mnt/secure/etc
+		settings=/mnt/ext1/system/config/settings/settings.json
+		rm -f $settings
+		mv -f $settings.old $settings
+		dialog 2 "" "Services uninstalled, restart is needed." "Restart now" "Restart later"
+		if [ $? == 1 ]; then
+			sync
+		        reboot
+		fi
+		exit 0
+	fi
+else
+	dialog 1 "" "Do you wish to install $PKGVER?" "Yes" "No"
+fi
 if [ $? != 1 ]; then
 	exit 0
 fi
@@ -11,12 +31,13 @@ echo "*.html files are served from here if 'HTTP server' option is enabled. dyna
 mkdir /mnt/ext1/public
 echo 'Files in here are served to public via smb:\\pocketbook\public, ftp://anonymous@pocketbook and http://pocketbook/public/' > /mnt/ext1/public/README.txt
 mkdir /mnt/ext1/.ssh
-mkdir /mnt/ext1/system/init.d
+mkdir -p /mnt/ext1/system/etc/init.d
 mkdir -p /mnt/ext1/system/config/settings
 
 ARCHIVE=`awk '/^__DATA/ {print NR + 1; exit 0; }' $0`
 chattr -i /mnt/secure/runonce/*.sh
 rm -rf /mnt/secure/etc/mod
+rm -rf /mnt/secure/etc/init.d
 tail -n+$ARCHIVE $0 | tar xz -C /mnt/secure
 chattr +i /mnt/secure/runonce/*.sh /mnt/secure/su
 if [ ! -e /mnt/secure/etc/passwd ]; then
@@ -100,8 +121,9 @@ echo "]" >> $rootset
 
 
 sync
-dialog 1 "" "Services installed, restart is needed to get em running." "Restart now" "Will restart manually"
+dialog 1 "" "Services installed, restart is needed to get em running." "Restart now" "Restart later"
 if [ $? == 1 ]; then
+	sync
 	/sbin/reboot
 fi
 exit 0
