@@ -32,6 +32,7 @@ if [ "$PVER" != "" ]; then
 		if [ $? == 2 ]; then
 			uninstall
 		fi
+		exit 0
 	fi
 else
 	dialog 1 "" "Do you wish to install $PKGVER?" "Yes" "No"
