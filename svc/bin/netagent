@@ -4,7 +4,7 @@ case "$1" in
 		touch /var/tmp/disconnect_pending
 		exit 0
 		;;
-	connect)
+	connect*)
 		rm -f /var/tmp/disconnect_pending
 		;;
 	net)
