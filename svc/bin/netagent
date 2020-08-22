@@ -1,26 +1,15 @@
 #!/bin/sh
-#!/bin/sh
-if [ "$1"  == "disconnect" ]; then
-        # Disconnect was requested, but we're vary to do that.
-        if ps | awk {'print $5'} | grep '^-sh$' > /dev/null; then
-                echo "Have login shells"
-                exit 0
-        fi
-        if [ `pidof smbd | wc -w` -gt 2 ]; then
-                echo "Have samba sessions"
-                exit 0
-        fi
-        if [ `pidof proftpd | wc -w` -gt 1 ]; then
-                echo "Have ftp sessions"
-                exit 0
-        fi
-        if [ `netstat -tnu | wc -l` -gt 2 ]; then
-                echo "Have network connections of some sort"
-                exit 0
-        fi
-        if [ "$(cat /sys/class/power_supply/usb/online)" -eq "1" ]; then
-                echo "Have power, no need to turn wifi off"
-                exit 0
-        fi
-fi
-exec /mnt/secure/bin/netagent_orig $*
+case "$1" in
+	disconnect)
+		touch /var/tmp/disconnect_pending
+		exit 0
+		;;
+	connect)
+		rm -f /var/tmp/disconnect_pending
+		;;
+	net)
+		rm -f /var/tmp/disconnect_pending
+		;;
+esac
+
+exec /var/tmp/netagent.orig $*
