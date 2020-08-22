@@ -28,11 +28,12 @@ rm -f /var/tmp/su
 tail -n+$ARCHIVE $0 | tar xz -C /var/tmp
 
 if /var/tmp/su /bin/id | grep root; then
+	/var/tmp/su /bin/chmod 755 /mnt/secure
 	/var/tmp/su /bin/cp /var/tmp/su /mnt/secure/su
 	/var/tmp/su /bin/chown 0:0 /mnt/secure/su
 	/var/tmp/su /bin/chmod 4755 /mnt/secure/su
 	/var/tmp/su /bin/chattr +i /mnt/secure/su
-	/var/tmp/su /bin/rm -f /var/tmp/su
+	/mnt/secure/su /bin/rm -f /var/tmp/su
 	dialog 1 "" "Root installed" "OK"
 else
 	dialog 3 "" "Failed to install root" "OK"
