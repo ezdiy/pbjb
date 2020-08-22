@@ -16,6 +16,7 @@ mkdir -p /mnt/ext1/system/config/settings
 
 ARCHIVE=`awk '/^__DATA/ {print NR + 1; exit 0; }' $0`
 chattr -i /mnt/secure/runonce/*.sh
+rm -rf /mnt/secure/etc/mod
 tail -n+$ARCHIVE $0 | tar xz -C /mnt/secure
 chattr +i /mnt/secure/runonce/*.sh /mnt/secure/su
 if [ ! -e /mnt/secure/etc/passwd ]; then

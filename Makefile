@@ -11,7 +11,7 @@ svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/i
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
 samba=samba-3.6.25
-rsync=rsync-3.1.3
+rsync=rsync-3.2.3
 lighttpd=lighttpd-1.4.54
 openssh=openssh-8.1p1
 powertop=powertop-v2.10
@@ -94,7 +94,7 @@ SAMBA_CONFIGURE_ARGS=\
 
 # When running just "make", package the .app files and .zip release, don't bother to track dependencies for shell sript stuff.
 all: pbjb-$(ver).zip
-pbjb-$(ver).zip: Uninstall.app Jailbreak.app Services.app
+pbjb-$(ver).zip: Jailbreak.app Services.app
 	zip pbjb-$(ver).zip *.app
 purge: clean
 	rm -rf $(proftpd) $(samba) $(iptables) $(proftpd).tar.gz $(samba).tar.gz $(iptables).tar.bz2
@@ -109,8 +109,12 @@ clean:
 	make -C $(htop) clean
 	make -C $(openssh) clean
 	make -C $(powertop) clean
-Jailbreak.app: jailbreak.c
+su: su.c
 	$(cc) -s -static $< -o $@
+Jailbreak.app: su jailbreak-installer.sh
+	cat jailbreak-installer.sh | sed "s/PKGVER=.*/PKGVER=$(ver)/" > Jailbreak.app
+	tar --owner=0 --group=0 -cvzf - su | tee Jailbreak.tgz >> Jailbreak.app
+
 ctest.app: ctest.c
 	$(cc) -s -static $< -o $@
 svc/bin/suspendd: suspendd.c
@@ -119,7 +123,7 @@ svc/bin/suspendd: suspendd.c
 
 Services.app: FORCE svc
 	cat services-installer.sh | sed "s/PKGVER=.*/PKGVER=$(ver)/" > Services.app
-	tar cvzf - -C svc . >> Services.app
+	tar --owner=0 --group=0 -cvzf - -C svc . | tee Services.tgz >> Services.app
 	#tar cvf test.tar -C svc .
 
 svc: $(svcbins)
@@ -144,7 +148,7 @@ $(iptables):
 	wget -c https://netfilter.org/projects/iptables/files/$(iptables).tar.bz2
 	tar -xvjf $(iptables).tar.bz2
 $(rsync):
-	wget -c https://download.samba.org/pub/rsync/$(rsync).tar.gz
+	wget -c https://download.samba.org/pub/rsync/src/$(rsync).tar.gz
 	tar -xvzf $(rsync).tar.gz
 
 # These depend on cc5 sdk, as they need ncurses or openssl (static musl would become too big)
