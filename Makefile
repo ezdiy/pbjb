@@ -131,42 +131,42 @@ svc: $(svcbins)
 
 # Retrieve source codes for binaries we compile statically with musl (smaller / more portable)
 $(openssh):
-	wget -c https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/$(openssh).tar.gz
+	wget -4 -c https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/$(openssh).tar.gz
 	tar -xvzf $(openssh).tar.gz
 
 $(lighttpd):
-	wget -c https://download.lighttpd.net/lighttpd/releases-1.4.x/$(lighttpd).tar.gz
+	wget -4 -c https://download.lighttpd.net/lighttpd/releases-1.4.x/$(lighttpd).tar.gz
 	tar -xvzf $(lighttpd).tar.gz
 $(proftpd):
-	wget -c ftp://ftp.proftpd.org/distrib/source/$(proftpd).tar.gz
+	wget -4 -c ftp://ftp.proftpd.org/distrib/source/$(proftpd).tar.gz
 	tar -xvzf $(proftpd).tar.gz
 $(samba):
-	wget -c https://download.samba.org/pub/samba/stable/$(samba).tar.gz
+	wget -4 -c https://download.samba.org/pub/samba/stable/$(samba).tar.gz
 	tar -xvzf $(samba).tar.gz
 	cd $(samba) && for p in ../samba-patches/*; do patch -p1 < $$p || exit 1; done
 $(iptables):
-	wget -c https://netfilter.org/projects/iptables/files/$(iptables).tar.bz2
+	wget -4 -c https://netfilter.org/projects/iptables/files/$(iptables).tar.bz2
 	tar -xvjf $(iptables).tar.bz2
 $(rsync):
-	wget -c https://download.samba.org/pub/rsync/src/$(rsync).tar.gz
+	wget -4 -c https://download.samba.org/pub/rsync/src/$(rsync).tar.gz
 	tar -xvzf $(rsync).tar.gz
 
 # These depend on cc5 sdk, as they need ncurses or openssl (static musl would become too big)
 $(htop):
-	wget -c https://hisham.hm/htop/releases/2.2.0/$(htop).tar.gz
+	wget -4 -c https://github.com/htop-dev/htop/archive/2.2.0.tar.gz -O $(htop).tar.gz
 	tar -xvzf $(htop).tar.gz
 $(nano):
-	wget -c https://www.nano-editor.org/dist/v4/$(nano).tar.gz
+	wget -4 -c https://www.nano-editor.org/dist/v4/$(nano).tar.gz
 	tar -xvzf $(nano).tar.gz
 #$(openvpn):
 #	wget -c https://swupdate.openvpn.org/community/releases/$(openvpn).tar.gz
 #	tar -xvzf $(openvpn).tar.gz
 
 $(powertop):
-	wget -c https://01.org/sites/default/files/downloads/$(powertop).tar.gz
+	wget -4 -c https://01.org/sites/default/files/downloads/$(powertop).tar.gz
 	tar -xvzf $(powertop).tar.gz
 $(lftp):
-	wget -c http://lftp.yar.ru/ftp/$(lftp).tar.gz
+	wget -4 -c http://lftp.yar.ru/ftp/$(lftp).tar.gz
 	tar -xvzf $(lftp).tar.gz
 
 # each of svcbin
