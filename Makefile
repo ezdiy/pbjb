@@ -91,6 +91,10 @@ SAMBA_CONFIGURE_ARGS=\
 	--without-libaddns \
 	--with-shared-modules=pdb_wbc_sam,idmap_nss,nss_info_template,auth_winbind,auth_wbc,auth_domain,rpc_lsarpc,rpc_samr,rpc_winreg,rpc_initshutdown,rpc_dssetup,rpc_wkssvc,rpc_svcctl,rpc_ntsvcs,rpc_netlogon,rpc_netdfs,rpc_srvsvc,rpc_spoolss,rpc_eventlog,auth_unix,auth_winbind,auth_wbc
 
+RSYNC_CONFIGURE_ARGS=\
+	--disable-xxhash \
+	--disable-zstd \
+	--disable-simd
 
 # When running just "make", package the .app files and .zip release, don't bother to track dependencies for shell sript stuff.
 all: pbjb-$(ver).zip
@@ -196,7 +200,7 @@ svc/bin/proftpd: $(proftpd)
 	$(strip) $(proftpd)/proftpd -o $@
 
 svc/bin/rsync: $(rsync)
-	(cd $(rsync) && $(common_configure5))
+	(cd $(rsync) && $(common_configure5) $(RSYNC_CONFIGURE_ARGS) )
 	make -C $(rsync)
 	$(strip) $(rsync)/rsync -o $@
 
