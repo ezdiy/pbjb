@@ -5,7 +5,6 @@ ENV DEBIAN_FRONTEND=noninteractive TZ=Europe/Amsterdam
 RUN dpkg --add-architecture i386
 
 RUN apt-get update && \
-#    apt-get -y install dh-autoreconf libreadline-dev zip wget git build-essential make \
     apt-get -y install dh-autoreconf zip wget git build-essential make \
     libc6:i386 libncurses5:i386 libstdc++6:i386 
 
