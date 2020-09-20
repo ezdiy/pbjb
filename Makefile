@@ -36,7 +36,7 @@ SAMBA_CONFIGURE_VARS=\
 	libreplace_cv_HAVE_GETADDRINFO=yes \
 	libreplace_cv_HAVE_IFACE_IFCONF=yes \
 	libreplace_cv_HAVE_IPV6=no \
-        libreplace_cv_HAVE_IPV6_V6ONLY=no \
+	libreplace_cv_HAVE_IPV6_V6ONLY=no \
 	LINUX_LFS_SUPPORT=yes \
 	samba_cv_CC_NEGATIVE_ENUM_VALUES=yes \
 	samba_cv_HAVE_GETTIMEOFDAY_TZ=yes \
@@ -110,9 +110,9 @@ clean:
 	rm -f $(samba)/auth/*.o $(samba)/source3/multi.o || true
 	make -C $(iptables) clean || true
 	make -C dropbear-hacks/src clean || true
-	make -C $(htop) clean
-	make -C $(openssh) clean
-	make -C $(powertop) clean
+	make -C $(htop) clean || true
+	make -C $(openssh) clean || true
+	make -C $(powertop) clean || true
 su: su.c
 	$(cc) -s -static $< -o $@
 Jailbreak.app: su jailbreak-installer.sh
@@ -216,7 +216,7 @@ svc/bin/lighttpd: $(lighttpd)
 	$(strip) $(lighttpd)/src/lighttpd -o $@
 
 svc/bin/htop: $(htop)
-	(cd $(htop) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
+	(cd $(htop) && ./autogen.sh && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
 	make -C $(htop)
 	$(strip) $(htop)/htop -o $@
 
