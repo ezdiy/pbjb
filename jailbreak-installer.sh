@@ -11,7 +11,11 @@ if [ -e /mnt/secure/su ]; then
 	if [ -e /mnt/secure/su ]; then
 		dialog 3 "" "Failed to remove root" "OK"
 	else
-		dialog 1 "" "Root removed" "OK"
+        dialog 1 "" "Root removed." "Restart now" "Restart later"
+        if [ $? == 1 ]; then
+            sync
+            iv2sh reboot
+        fi
 	fi
 	exit 0
 fi

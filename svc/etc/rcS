@@ -1,4 +1,6 @@
 #!/bin/sh
+export PATH=/mnt/secure/bin:/sbin:/usr/sbin:$PATH
+chmod 755 /mnt/secure
 sleep 2
 # safety escape
 kc=$(dmesg | grep gpio_keys_gpio_isr | wc -l)
@@ -7,7 +9,7 @@ if [ $kc -gt 10 ]; then
 fi
 export PATH=/mnt/secure/bin:/sbin:/usr/sbin:$PATH
 . /mnt/ext1/system/config/rootsettings.cfg
-for f in /mnt/ext1/system/init.d/*.sh /mnt/secure/init.d/*.sh; do
+for f in /mnt/ext1/system/init.d/*.sh /mnt/secure/etc/init.d/*.sh; do
         n=${f##*/}
         bn=${n:3}
         id=${bn/.sh/}
