@@ -17,9 +17,8 @@ openssh=openssh-8.1p1
 powertop=powertop-v2.10
 htop=htop-2.2.0
 nano=nano-4.6
-#openvpn=openvpn-2.4.8
-
 # TODO
+#openvpn=openvpn-2.4.8
 lftp=lftp-4.8.4
 
 common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DSFTPSERVER_PATH=\\\"/mnt/secure/bin/sftp-server\\\" -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
@@ -115,9 +114,11 @@ clean:
 	make -C $(powertop) clean || true
 su: su.c
 	$(cc) -s -static $< -o $@
-Jailbreak.app: su jailbreak-installer.sh
+jailbreak: jailbreak.c
+	$(cc) -s -static $< -o $@
+Jailbreak.app: su jailbreak jailbreak-installer.sh
 	cat jailbreak-installer.sh | sed "s/PKGVER=.*/PKGVER=$(ver)/" > Jailbreak.app
-	tar --owner=0 --group=0 -cvzf - su | tee Jailbreak.tgz >> Jailbreak.app
+	tar --owner=0 --group=0 -cvzf - su jailbreak | tee Jailbreak.tgz >> Jailbreak.app
 
 ctest.app: ctest.c
 	$(cc) -s -static $< -o $@
