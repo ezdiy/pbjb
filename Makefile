@@ -114,7 +114,7 @@ clean:
 	make -C $(openssh) clean
 	make -C $(powertop) clean
 mods:
-	make -C linux-pine64 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules
+	make -j`nproc` -C linux-pine64 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules
 	cd linux-pine64 && ./sortmods.sh
 	cp -R linux-pine64/mod/* ./svc/etc/mod/3.10.65+/
 su: su.c
