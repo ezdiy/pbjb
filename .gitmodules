@@ -1,3 +1,6 @@
 [submodule "dropbear-hacks"]
 	path = dropbear-hacks
 	url = https://github.com/ezdiy/dropbear-hacks
+[submodule "linux-pine64"]
+	path = linux-pine64
+	url = https://github.com/ezdiy/linux-pine64
