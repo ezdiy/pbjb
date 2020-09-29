@@ -113,6 +113,10 @@ clean:
 	make -C $(htop) clean
 	make -C $(openssh) clean
 	make -C $(powertop) clean
+mods:
+	make -C linux-pine64 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules
+	cd linux-pine64 && ./sortmods.sh
+	cp -R linux-pine64/mod/* ./svc/etc/mod/3.10.65+/
 su: su.c
 	$(cc) -s -static $< -o $@
 Jailbreak.app: su jailbreak-installer.sh
@@ -124,8 +128,7 @@ ctest.app: ctest.c
 svc/bin/suspendd: suspendd.c
 	$(cc5) -s -linkview -Wall $< -o $@
 
-
-Services.app: FORCE svc
+Services.app: mods FORCE svc
 	cat services-installer.sh | sed "s/PKGVER=.*/PKGVER=$(ver)/" > Services.app
 	tar --owner=0 --group=0 -cvzf - -C svc . | tee Services.tgz >> Services.app
 	#tar cvf test.tar -C svc .
@@ -247,6 +250,3 @@ svc/bin/sftp-server: $(openssh)
 	$(strip) $(openssh)/sftp-server -o svc/bin/sftp-server
 
 FORCE:
-
-
-
