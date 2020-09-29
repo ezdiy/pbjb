@@ -17,9 +17,8 @@ openssh=openssh-8.1p1
 powertop=powertop-v2.10
 htop=htop-2.2.0
 nano=nano-4.6
-#openvpn=openvpn-2.4.8
-
 # TODO
+#openvpn=openvpn-2.4.8
 lftp=lftp-4.8.4
 
 common_configure=./configure --disable-ipv6 --localstatedir=/var/run --sharedstatedir=/var --host=arm-linux-gnueabi CC=$(cc) --prefix=/mnt/secure --enable-static --disable-shared LDFLAGS="--static -Wl,-gc-sections" CFLAGS="-DPUBKEY_RELAXED_PERMS=1 -DSFTPSERVER_PATH=\\\"/mnt/secure/bin/sftp-server\\\" -DDROPBEAR_PATH_SSH_PROGRAM=\\\"/mnt/secure/bin/ssh\\\" -D__mempcpy=mempcpy -ffunction-sections -fdata-sections" --prefix=/mnt/secure --sbindir=/mnt/secure/bin --datarootdir=/mnt/secure
@@ -36,7 +35,7 @@ SAMBA_CONFIGURE_VARS=\
 	libreplace_cv_HAVE_GETADDRINFO=yes \
 	libreplace_cv_HAVE_IFACE_IFCONF=yes \
 	libreplace_cv_HAVE_IPV6=no \
-        libreplace_cv_HAVE_IPV6_V6ONLY=no \
+	libreplace_cv_HAVE_IPV6_V6ONLY=no \
 	LINUX_LFS_SUPPORT=yes \
 	samba_cv_CC_NEGATIVE_ENUM_VALUES=yes \
 	samba_cv_HAVE_GETTIMEOFDAY_TZ=yes \
@@ -110,18 +109,20 @@ clean:
 	rm -f $(samba)/auth/*.o $(samba)/source3/multi.o || true
 	make -C $(iptables) clean || true
 	make -C dropbear-hacks/src clean || true
-	make -C $(htop) clean
-	make -C $(openssh) clean
-	make -C $(powertop) clean
+	make -C $(htop) clean || true
+	make -C $(openssh) clean || true
+	make -C $(powertop) clean || true
 mods:
 	make -j`nproc` -C linux-pine64 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules
 	cd linux-pine64 && ./sortmods.sh
 	cp -R linux-pine64/mod/* ./svc/etc/mod/3.10.65+/
 su: su.c
 	$(cc) -s -static $< -o $@
-Jailbreak.app: su jailbreak-installer.sh
+jailbreak: jailbreak.c
+	$(cc) -s -static $< -o $@
+Jailbreak.app: su jailbreak jailbreak-installer.sh
 	cat jailbreak-installer.sh | sed "s/PKGVER=.*/PKGVER=$(ver)/" > Jailbreak.app
-	tar --owner=0 --group=0 -cvzf - su | tee Jailbreak.tgz >> Jailbreak.app
+	tar --owner=0 --group=0 -cvzf - su jailbreak | tee Jailbreak.tgz >> Jailbreak.app
 
 ctest.app: ctest.c
 	$(cc) -s -static $< -o $@
@@ -219,7 +220,7 @@ svc/bin/lighttpd: $(lighttpd)
 	$(strip) $(lighttpd)/src/lighttpd -o $@
 
 svc/bin/htop: $(htop)
-	(cd $(htop) && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
+	(cd $(htop) && ./autogen.sh && $(common_configure5) ac_cv_lib_ncurses_refresh=yes LIBS=-lncurses HTOP_NCURSES_CONFIG_SCRIPT=/bin/false)
 	make -C $(htop)
 	$(strip) $(htop)/htop -o $@
 
