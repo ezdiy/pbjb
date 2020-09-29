@@ -4,3 +4,4 @@
 [submodule "linux-pine64"]
 	path = linux-pine64
 	url = https://github.com/ezdiy/linux-pine64
+	depth = 1
