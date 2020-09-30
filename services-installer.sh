@@ -4,12 +4,25 @@ PKGVER=v4
 iv2sh SetActiveTask `pidof bookshelf.app` 0
 PVER=`cat /mnt/secure/.pkgver`
 
-function uninstall() {
+base=/mnt/ext1/system/config/settings
+settings=$base/settings.json
+rootset=$base/rootsettings.json
+old=/ebrmain/config/settings/settings.json
+
+function do_uninstall()
+	umount /usr/share/terminfo
+	for n in ins_usbnet rm_usbnet ins_usb_mod rm_usb_mod usb_test; do
+		umount /lib/modules/$n.sh
+	done
 	chattr -i /mnt/secure/runonce/*.sh
 	rm -rf /mnt/secure/runonce/*.sh /mnt/secure/bin /mnt/secure/etc /mnt/secure/.pkgver
-	settings=/mnt/ext1/system/config/settings/settings.json
 	rm -f $settings
 	mv -f $settings.old $settings
+	# if settings is missing, will be copied from system
+end
+
+function uninstall() {
+	do_uninstall
 	dialog 2 "" "Services uninstalled, restart is needed." "Restart now" "Restart later"
 	if [ $? == 1 ]; then
 		sync
@@ -27,6 +40,7 @@ if [ "$PVER" != "" ]; then
 		elif [ $st == 2 ]; then
 			exit 0
 		fi
+		do_uninstall
 	else
 		dialog 1 "" "Version $PVER already installed." "Cancel" "Uninstall"
 		if [ $? == 2 ]; then
@@ -62,10 +76,6 @@ if [ ! -e /mnt/secure/etc/passwd ]; then
 	echo -n password=$PW > /mnt/ext1/rootpassword.txt
 fi
 
-base=/mnt/ext1/system/config/settings
-settings=$base/settings.json
-rootset=$base/rootsettings.json
-old=/ebrmain/config/settings/settings.json 
 
 if [ -e $settings ] && ! grep rootsettings $settings> /dev/null; then
 	old=$settings.old

@@ -3,11 +3,12 @@
 for n in ins_usbnet rm_usbnet ins_usb_mod rm_usb_mod usb_test; do
 	umount /lib/modules/$n.sh
 done
-mount -o bind /mnt/secure/bin/ins_usb_mod.sh /lib/modules/ins_usb_mod.sh
-mount -o bind /mnt/secure/bin/rm_usb_mod.sh /lib/modules/rm_usb_mod.sh
-mount -o bind /mnt/secure/bin/usb_test.sh /lib/modules/usb_test.sh
-mount -o bind /mnt/secure/bin/empty.sh /lib/modules/ins_usbnet.sh
-mount -o bind /mnt/secure/bin/empty.sh /lib/modules/rm_usbnet.sh
+cp -af /mnt/secure/bin/*.sh /var/tmp/
+mount -o bind /var/tmp/ins_usb_mod.sh /lib/modules/ins_usb_mod.sh
+mount -o bind /var/tmp/rm_usb_mod.sh /lib/modules/rm_usb_mod.sh
+mount -o bind /var/tmp/usb_test.sh /lib/modules/usb_test.sh
+mount -o bind /var/tmp/empty.sh /lib/modules/ins_usbnet.sh
+mount -o bind /var/tmp/empty.sh /lib/modules/rm_usbnet.sh
 cd /sys/class/android_usb/android0
 for t in 0 1 2; do
 	echo 0 > enable
