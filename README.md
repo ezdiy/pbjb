@@ -18,7 +18,7 @@ Requirements: [installed Docker environment](https://docs.docker.com/get-docker)
 To prepare the Docker image, clone this repository with its submodule(s), if you haven't yet:
 
 ```console
-git clone https://github.com/ezdiy/pbjb.git --recurse-submodules
+git clone https://github.com/ezdiy/pbjb.git --recurse-submodules --shallow-submodules
 ```
 
 build the image:
