@@ -1,6 +1,15 @@
 #!/mnt/secure/su /bin/sh
 export PATH=/sbin:/usr/sbin:$PATH
-PKGVER=v4
+PKGVER=v8
+install_log=/mnt/ext1/pbjb_install_log.txt
+
+# re-exec ourselves with logging enabled
+if [ "$PBJB_HAS_LOG" = "" ]; then
+	export PBJB_HAS_LOG=1
+	echo "You'll see nothing here. Install log will be in $install_log"
+	exec /bin/sh -x $0 2>&1 > $install_log
+fi
+
 iv2sh SetActiveTask `pidof bookshelf.app` 0
 PVER=`cat /mnt/secure/.pkgver`
 
@@ -9,20 +18,35 @@ settings=$base/settings.json
 rootset=$base/rootsettings.json
 old=/ebrmain/config/settings/settings.json
 
-function do_uninstall()
-	umount /usr/share/terminfo
+function remove_bind() {
+	umount -l /usr/share/terminfo
+	umount -l /ebrmain/bin/netagent
+	umount -l /var/tmp/netagent.orig
 	for n in ins_usbnet rm_usbnet ins_usb_mod rm_usb_mod usb_test; do
-		umount /lib/modules/$n.sh
+		umount -l /lib/modules/$n.sh
 	done
+}
+
+bk=/var/tmp/backup_etc
+function backup_config() {
+	mkdir /var/tmp/backup_etc
+	cp -af /mnt/secure/etc/firewall $bk
+	cp -af /mnt/secure/etc/*passwd $bk
+	cp -af /mnt/secure/etc/*.conf $bk
+}
+function restore_config() {
+	cp -af $bk/* /mnt/secure/etc/
+}
+
+
+function uninstall() {
+	remove_bind
 	chattr -i /mnt/secure/runonce/*.sh
-	rm -rf /mnt/secure/runonce/*.sh /mnt/secure/bin /mnt/secure/etc /mnt/secure/.pkgver
+	rm -rf /mnt/secure/runonce/*.sh /mnt/secure/bin /mnt/secure/etc /mnt/secure/lib /mnt/secure/.pkgver
 	rm -f $settings
 	mv -f $settings.old $settings
 	# if settings is missing, will be copied from system
-end
 
-function uninstall() {
-	do_uninstall
 	dialog 2 "" "Services uninstalled, restart is needed." "Restart now" "Restart later"
 	if [ $? == 1 ]; then
 		sync
@@ -40,7 +64,6 @@ if [ "$PVER" != "" ]; then
 		elif [ $st == 2 ]; then
 			exit 0
 		fi
-		do_uninstall
 	else
 		dialog 1 "" "Version $PVER already installed." "Cancel" "Uninstall"
 		if [ $? == 2 ]; then
@@ -64,12 +87,31 @@ mkdir -p /mnt/ext1/system/etc/init.d
 mkdir -p /mnt/ext1/system/config/settings
 
 ARCHIVE=`awk '/^__DATA/ {print NR + 1; exit 0; }' $0`
+
+#try *very* aggressively to remove everything that could stand in our way
+
+remove_bind
+backup_config
+
 chattr -i /mnt/secure/runonce/*.sh
-rm -rf /mnt/secure/etc/mod
+chattr -i /mnt/secure/init.d
+chattr -i /mnt/secure/rcS
+chattr -i /mnt/secure/etc
+chattr -i /mnt/secure/init.d/*
 rm -rf /mnt/secure/init.d #old location
 rm -f /mnt/secure/rcS #old location
-rm -rf /mnt/secure/etc/init.d
+rm -f /mnt/secure/.pkgver
+rm -rf /mnt/secure/etc /mnt/secure/bin /mnt/secure/lib
+
 tail -n+$ARCHIVE $0 | tar xz -C /mnt/secure
+
+if [ $? != 0 ]; then
+	dialog 3 "" "Install files extraction failed. See `basename $install_log`" "OK"
+	exit 1
+fi
+
+restore_config
+
 chattr +i /mnt/secure/runonce/*.sh /mnt/secure/su
 if [ ! -e /mnt/secure/etc/passwd ]; then
 	PW=$RANDOM

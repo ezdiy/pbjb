@@ -8,6 +8,7 @@ ver=$(shell git describe --tags)
 # These are made by the cross compiler
 svcbins=svc/bin/dropbear svc/bin/smbd svc/bin/ntlmhash svc/bin/proftpd svc/bin/iptables svc/bin/rsync svc/bin/lighttpd svc/bin/sftp-server svc/bin/htop svc/bin/powertop svc/bin/nano svc/bin/lftp
 
+mods=svc/etc/mod/3.10.65+
 proftpd=proftpd-1.3.5e
 iptables=iptables-1.8.3
 samba=samba-3.6.25
@@ -112,10 +113,12 @@ clean:
 	make -C $(htop) clean || true
 	make -C $(openssh) clean || true
 	make -C $(powertop) clean || true
-mods:
+	rm -rf $(mods)
+$(mods):
 	make -j`nproc` -C linux-pine64 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules
 	cd linux-pine64 && ./sortmods.sh
-	cp -R linux-pine64/mod/* ./svc/etc/mod/3.10.65+/
+	mkdir -p $(mods)
+	cp -R linux-pine64/mod/* $(mods)
 su: su.c
 	$(cc) -s -static $< -o $@
 jailbreak: jailbreak.c
@@ -129,7 +132,7 @@ ctest.app: ctest.c
 svc/bin/suspendd: suspendd.c
 	$(cc5) -s -linkview -Wall $< -o $@
 
-Services.app: mods FORCE svc
+Services.app: $(mods) FORCE svc
 	cat services-installer.sh | sed "s/PKGVER=.*/PKGVER=$(ver)/" > Services.app
 	tar --owner=0 --group=0 -cvzf - -C svc . | tee Services.tgz >> Services.app
 	#tar cvf test.tar -C svc .
