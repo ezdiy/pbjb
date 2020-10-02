@@ -101,7 +101,9 @@ rm -f /mnt/secure/rcS #old location
 rm -f /mnt/secure/.pkgver
 rm -rf /mnt/secure/etc /mnt/secure/bin /mnt/secure/lib
 
-tail -n+$ARCHIVE $0 | tar xz -C /mnt/secure
+echo "Extracting"
+chmod 755 /mnt/secure
+tail -n+$ARCHIVE $0 | (cd /mnt/secure && tar xvz -C /mnt/secure)
 
 if [ $? != 0 ]; then
 	dialog 3 "" "Install files extraction failed. See `basename $install_log`" "OK"
