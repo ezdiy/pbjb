@@ -2,13 +2,11 @@
 export PATH=/sbin:/usr/sbin:$PATH
 PKGVER=v8
 install_log=/mnt/ext1/pbjb_install_log.txt
-
-# re-exec ourselves with logging enabled
-if [ "$PBJB_HAS_LOG" = "" ]; then
-	export PBJB_HAS_LOG=1
-	echo "You'll see nothing here. Install log will be in $install_log"
-	exec /bin/sh -x $0 2>&1 > $install_log
-fi
+exec 1<&-
+exec 2<&-
+exec 1<>$install_log
+exec 2>&1
+set -x
 
 iv2sh SetActiveTask `pidof bookshelf.app` 0
 PVER=`cat /mnt/secure/.pkgver`
