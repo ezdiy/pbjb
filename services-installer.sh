@@ -98,7 +98,6 @@ chattr -i /mnt/secure/etc
 chattr -i /mnt/secure/init.d/*
 rm -rf /mnt/secure/init.d #old location
 rm -f /mnt/secure/rcS #old location
-rm -f /mnt/secure/.pkgver
 rm -rf /mnt/secure/etc /mnt/secure/bin /mnt/secure/lib
 
 echo "Extracting"
